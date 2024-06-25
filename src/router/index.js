@@ -1,27 +1,78 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Login from '../views/login/Login'
+import Register from '../views/register/Register'
+import Home from '../views/home/Home'
 
-Vue.use(VueRouter)
+const originalPush = VueRouter.prototype.push;
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err);
+}
+
+Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'home',
-    component: HomeView
+    component: Home
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: '/login',
+    name: 'login',
+    component: Login
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: Register
+  },
+  // {
+  //   path: '/',
+  //   redirect: '/login'
+  // },
+  {
+    path: '/',
+    component: () => import('../components/home'),
+    children: [{
+      path: "/",
+      name: "index",
+      component: () => import('../components/index')
+    }, {
+      path: "/sort",
+      name: "sort",
+      component: () => import('../components/sort')
+    }, {
+      path: "/article/:id",
+      name: "article",
+      component: () => import('../components/article')
+    }, {
+      path: "/favorite",
+      name: "favorite",
+      component: () => import('../components/favorite')
+    }, {
+      path: "/message",
+      name: "message",
+      component: () => import('../components/message')
+    }, {
+      path: "/user",
+      name: "user",
+      component: () => import('../components/user')
+    }, {
+      path: "/letter",
+      name: "letter",
+      component: () => import('../components/letter')
+    }]
+  },
+];
 
 const router = new VueRouter({
-  routes
+  mode: "history",
+  routes: routes,
+  scrollBehavior(to, from, savedPosition) {
+    return {x: 0, y: 0}
+  }
 })
+
 
 export default router
