@@ -3,7 +3,7 @@
     <!-- 框 -->
     <textarea
       class="comment-textarea"
-      v-model="commentContent"
+      v-model="content"
       placeholder="写下点什么..."
       maxlength="1000"/>
     <!-- 按钮 -->
@@ -12,9 +12,6 @@
         <div :class="{'emoji-active':showEmoji}"
              @click="showEmoji = !showEmoji">
           <i class="el-icon-orange myEmoji"></i>
-        </div>
-        <div @click="openPicture()">
-          <i class="el-icon-picture myPicture"></i>
         </div>
       </div>
 
@@ -36,31 +33,17 @@
     <!-- 表情 -->
     <emoji @addEmoji="addEmoji" :showEmoji="showEmoji"></emoji>
 
-    <el-dialog title="图片"
-               :visible.sync="showPicture"
-               width="25%"
-               :append-to-body="true"
-               :close-on-click-modal="false"
-               destroy-on-close
-               center>
-      <div>
-        <uploadPicture :prefix="'commentPicture'" @addPicture="addPicture" :maxSize="2"
-                       :maxNumber="1"></uploadPicture>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
   const emoji = () => import( "../common/emoji");
   const proButton = () => import( "../common/proButton");
-  const uploadPicture = () => import( "../common/uploadPicture");
 
   export default {
     components: {
       emoji,
       proButton,
-      uploadPicture
     },
     props: {
       disableGraffiti: {
@@ -70,7 +53,7 @@
     },
     data() {
       return {
-        commentContent: "",
+        content: "",
         showEmoji: false,
         showPicture: false,
         picture: {
@@ -80,45 +63,14 @@
       };
     },
     methods: {
-      openPicture() {
-        if (this.$common.isEmpty(this.$store.state.currentUser)) {
-          this.$message({
-            message: "请先登录！",
-            type: "error"
-          });
-          return;
-        }
 
-        this.showPicture = true;
-      },
 
-      addPicture(res) {
-        this.picture.url = res;
-        this.savePicture();
-      },
-      savePicture() {
-        let img = "[" + this.picture.name + "," + this.picture.url + "]";
-        this.commentContent += img;
-        this.picture.url = "";
-        this.showPicture = false;
-      },
       addEmoji(key) {
-        this.commentContent += key;
+        this.content += key;
       },
-      showGraffiti() {
-        if (this.$common.isEmpty(this.$store.state.currentUser)) {
-          this.$message({
-            message: "请先登录！",
-            type: "error"
-          });
-          return;
-        }
 
-        this.commentContent = "";
-        this.$emit("showGraffiti");
-      },
       submitComment() {
-        if (this.$common.isEmpty(this.$store.state.currentUser)) {
+        if (this.$common.isEmpty(this.$store.state.currentUser) && false) {
           this.$message({
             message: "请先登录！",
             type: "error"
@@ -126,15 +78,15 @@
           return;
         }
 
-        if (this.commentContent.trim() === "") {
+        if (this.content.trim() === "") {
           this.$message({
             message: "你还没写呢~",
             type: "warning"
           });
           return;
         }
-        this.$emit("submitComment", this.commentContent.trim());
-        this.commentContent = "";
+        this.$emit("submit", this.content.trim());
+        this.content = "";
       }
     }
   }
@@ -152,7 +104,7 @@
     /* 不改变边框 */
     outline: none;
     border-radius: 4px;
-    background-image: var(--commentURL);
+    background-image: var();
     background-size: contain;
     background-repeat: no-repeat;
     background-position: 100%;

@@ -3,13 +3,13 @@
     <!-- 评论框 -->
     <div style="margin-bottom: 40px">
       <div class="comment-head">
-        <i class="el-icon-edit-outline" style="font-weight: bold;font-size: 22px;"></i> 留言
+        <i class="el-icon-edit-outline" style="font-weight: bold;font-size: 22px;"></i> 给文章留言吧！
       </div>
       <div>
         <!-- 文字评论 -->
         <div v-show="!isGraffiti">
           <commentBox @showGraffiti="isGraffiti = !isGraffiti"
-                      @submitComment="submitComment">
+                      @submit="submitComment">
           </commentBox>
         </div>
         <!-- 画笔 -->
@@ -39,21 +39,20 @@
           <!-- 评论信息 -->
           <div style="display: flex;justify-content: space-between">
             <div>
-              <span class="commentInfo-username">{{ item.username }}</span>
-              <span class="commentInfo-master" v-if="item.userId === userId">主人翁</span>
+              <span class="commentInfo-username">{{ item.author }}</span>
               <span class="commentInfo-other">{{ $common.getDateDiff(item.createTime) }}</span>
             </div>
             <div class="commentInfo-reply" @click="replyDialog(item, item)">
-              <span v-if="item.childComments.total > 0">{{item.childComments.total}} </span><span>回复</span>
+              <span v-if="item.childrenNode.length > 0">{{item.childrenNode.length}} </span><span>回复</span>
             </div>
           </div>
           <!-- 评论内容 -->
           <div class="commentInfo-content">
-            <span v-html="item.commentContent"></span>
+            <span v-html="item.content"></span>
           </div>
           <!-- 回复模块 -->
-          <div v-if="!$common.isEmpty(item.childComments) && !$common.isEmpty(item.childComments.records)">
-            <div class="commentInfo-detail" v-for="(childItem, i) in item.childComments.records" :key="i">
+          <div v-if="!$common.isEmpty(item.childrenNode)">
+            <div class="commentInfo-detail" v-for="(childItem, i) in item.childrenNode" :key="i">
               <!-- 头像 -->
               <el-avatar shape="square" class="commentInfo-avatar" :size="30" :src="childItem.avatar"></el-avatar>
 
@@ -61,8 +60,7 @@
                 <!-- 评论信息 -->
                 <div style="display: flex;justify-content: space-between">
                   <div>
-                    <span class="commentInfo-username-small">{{ childItem.username }}</span>
-                    <span class="commentInfo-master" v-if="childItem.userId === userId">主人翁</span>
+                    <span class="commentInfo-username-small">{{ childItem.author }}</span>
                     <span class="commentInfo-other">{{ $common.getDateDiff(childItem.createTime) }}</span>
                   </div>
                   <div>
@@ -71,21 +69,20 @@
                 </div>
                 <!-- 评论内容 -->
                 <div class="commentInfo-content">
-                  <template v-if="childItem.parentCommentId !== item.id &&
-                                  childItem.parentUserId !== childItem.userId">
-                    <span style="color: var(--blue)">@{{ childItem.parentUsername }} </span>:
+                  <template v-if="childItem.toUsername !== item.author">
+                    <span style="color: var(--blue)">@{{ childItem.toUsername }} </span>:
                   </template>
-                  <span v-html="childItem.commentContent"></span>
+                  <span v-html="childItem.content"></span>
                 </div>
               </div>
             </div>
             <!-- 分页 -->
-            <div class="pagination-wrap" v-if="item.childComments.records.length < item.childComments.total">
-              <div class="pagination"
-                   @click="toChildPage(item)">
-                展开
-              </div>
-            </div>
+<!--            <div class="pagination-wrap" v-if="item.childrenNode.length < item.childTotal">-->
+<!--              <div class="pagination"-->
+<!--                   @click="toChildPage(item)">-->
+<!--                展开-->
+<!--              </div>-->
+<!--            </div>-->
           </div>
         </div>
       </div>
@@ -103,7 +100,7 @@
       <i>来发第一个留言啦~</i>
     </div>
 
-    <el-dialog title="留言"
+    <el-dialog title="给这位朋友留个言吧"
                :visible.sync="replyDialogVisible"
                width="30%"
                :before-close="handleClose"
@@ -113,7 +110,7 @@
                center>
       <div>
         <commentBox :disableGraffiti="true"
-                    @submitComment="submitReply">
+                    @submit="submitReply">
         </commentBox>
       </div>
     </el-dialog>
@@ -133,13 +130,13 @@
     },
     props: {
       source: {
-        type: Number
+        type: String
       },
       type: {
         type: String
       },
       userId: {
-        type: Number
+        type: String
       }
     },
     data() {
@@ -189,51 +186,42 @@
             });
           });
       },
-      toChildPage(floorComment) {
-        floorComment.childComments.current += 1;
-        let pagination = {
-          current: floorComment.childComments.current,
-          size: 5,
-          total: 0,
-          source: this.source,
-          commentType: this.type,
-          floorCommentId: floorComment.id
-        }
-        this.getComments(pagination, floorComment, true);
-      },
+      // toChildPage(floorComment) {
+      //   floorComment.childrenNode.current += 1;
+      //   let pagination = {
+      //     current: floorComment.childrenNode.current,
+      //     size: 5,
+      //     total: 0,
+      //     source: this.source,
+      //     commentType: this.type,
+      //     floorCommentId: floorComment.id
+      //   }
+      //   this.getComments(pagination, floorComment, true);
+      // },
       emoji(comments, flag) {
         comments.forEach(c => {
-          c.commentContent = c.commentContent.replace(/\n/g, '<br/>');
-          c.commentContent = this.$common.faceReg(c.commentContent);
-          c.commentContent = this.$common.pictureReg(c.commentContent);
+          c.content = c.content.replace(/\n/g, '<br/>');
+          c.content = this.$common.faceReg(c.content);
+          c.content = this.$common.pictureReg(c.content);
           if (flag) {
-            if (!this.$common.isEmpty(c.childComments) && !this.$common.isEmpty(c.childComments.records)) {
-              c.childComments.records.forEach(cc => {
-                c.commentContent = c.commentContent.replace(/\n/g, '<br/>');
-                cc.commentContent = this.$common.faceReg(cc.commentContent);
-                cc.commentContent = this.$common.pictureReg(cc.commentContent);
+            if (!this.$common.isEmpty(c.childrenNode)) {
+              c.childrenNode.forEach(cc => {
+                c.content = c.content.replace(/\n/g, '<br/>');
+                cc.content = this.$common.faceReg(cc.content);
+                cc.content = this.$common.pictureReg(cc.content);
               });
             }
           }
         });
       },
       getComments(pagination, floorComment = {}, isToPage = false) {
-        this.$http.post(this.$constant.baseURL + "/comment/listComment", pagination)
+        this.$http.get(this.$constant.baseURL + "/comment/selectByBlogUid", pagination)
           .then((res) => {
-            if (!this.$common.isEmpty(res.data) && !this.$common.isEmpty(res.data.records)) {
-              if (this.$common.isEmpty(floorComment)) {
-                this.comments = res.data.records;
-                pagination.total = res.data.total;
-                this.emoji(this.comments, true);
-              } else {
-                if (isToPage === false) {
-                  floorComment.childComments = res.data;
-                } else {
-                  floorComment.childComments.total = res.data.total;
-                  floorComment.childComments.records = floorComment.childComments.records.concat(res.data.records);
-                }
-                this.emoji(floorComment.childComments.records, false);
-              }
+            if (!this.$common.isEmpty(res.data)) {
+              this.comments = res.data.commentList;
+              pagination.total = res.data.total;
+              this.emoji(this.comments, true);
+
               this.$nextTick(() => {
                 this.$common.imgShow("#comment-content .pictureReg");
               });
@@ -249,14 +237,15 @@
       addGraffitiComment(graffitiComment) {
         this.submitComment(graffitiComment);
       },
-      submitComment(commentContent) {
+
+      submitComment(content) {
         let comment = {
-          source: this.source,
+          blogUid: this.source,
           type: this.type,
-          commentContent: commentContent
+          content: content
         };
 
-        this.$http.post(this.$constant.baseURL + "/comment/saveComment", comment)
+        this.$http.post(this.$constant.baseURL + "/comment/insert", comment)
           .then((res) => {
             this.$message({
               type: 'success',
@@ -280,29 +269,28 @@
             });
           });
       },
-      submitReply(commentContent) {
+      submitReply(content) {
         let comment = {
-          source: this.source,
+          blogUid: this.source,
           type: this.type,
-          floorCommentId: this.floorComment.id,
-          commentContent: commentContent,
-          parentCommentId: this.replyComment.id,
-          parentUserId: this.replyComment.userId
+          parentId: this.floorComment.uid,
+          content: content,
+          toUsername: this.replyComment.author,
         };
-
+        console.log(this.replyComment.author+"==============================================")
         let floorComment = this.floorComment;
 
-        this.$http.post(this.$constant.baseURL + "/comment/saveComment", comment)
+        this.$http.post(this.$constant.baseURL + "/comment/insert", comment)
           .then((res) => {
             let pagination = {
               current: 1,
-              size: 5,
+              size: 10,
               total: 0,
               source: this.source,
               commentType: this.type,
-              floorCommentId: floorComment.id
+              floorCommentId: floorComment.uid
             }
-            this.getComments(pagination, floorComment);
+            this.getComments(pagination);
             this.getTotal();
           })
           .catch((error) => {

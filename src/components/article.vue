@@ -157,8 +157,8 @@
           </div>
 
           <!-- 评论 -->
-          <div v-if="article.commentStatus === true">
-            <comment :type="'article'" :source="article.uid" :userId="article.userId"></comment>
+          <div v-if="article.status === 1">
+            <comment :type="'article'" :source="article.uid" :userId="article.userUid"></comment>
           </div>
         </div>
 
@@ -244,7 +244,11 @@
       return {
         id: this.$route.params.id,
         subscribe: false,
-        article: {},
+        article: {
+          blogSort: {
+            sortName: ''
+          }
+        },
         articleContentHtml: "",
         treeHoleList: [],
         weiYanDialogVisible: false,
@@ -289,12 +293,12 @@
     },
     methods: {
       clickTocButton() {
-        // let display = $(".toc");
-        // if ("none" === display.css("display")) {
-        //   display.css("display", "unset");
-        // } else {
-        //   display.css("display", "none");
-        // }
+        let display = $(".toc");
+        if ("none" === display.css("display")) {
+          display.css("display", "unset");
+        } else {
+          display.css("display", "none");
+        }
       },
       subscribeLabel() {
         if (this.$common.isEmpty(this.$store.state.currentUser)) {
