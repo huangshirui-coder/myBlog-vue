@@ -11,27 +11,16 @@
       <div slot="error" class="image-slot"></div>
     </el-image>
     <div class="poem-wrap">
-      <div v-if="isShehui"><span>鬼畜全明星</span></div>
-      <div v-else><span>{{isHitokoto?hitokoto.from:guShi.origin}}</span></div>
-      <p class="poem">{{isHitokoto?hitokoto.hitokoto:guShi.content}}</p>
-      <p class="info" v-if="!isShehui && (!isHitokoto || (isHitokoto && !$common.isEmpty(hitokoto.from_who)))">
-        {{isHitokoto?hitokoto.from_who:guShi.author}}
+      <div><span>{{guShi.origin}}</span></div>
+      <p class="poem">{{guShi.content}}</p>
+      <p class="info">
+        {{guShi.author}}
       </p>
     </div>
   </div>
 </template>
 <script>
   export default {
-    props: {
-      isHitokoto: {
-        type: Boolean,
-        default: true
-      },
-      isShehui: {
-        type: Boolean,
-        default: false
-      }
-    },
     data() {
       return {
         guShi: {
@@ -39,41 +28,14 @@
           "origin": "...",
           "author": "...",
           "category": "..."
-        },
-        hitokoto: {
-          "hitokoto": "...",
-          "from": "...",
-          "from_who": "..."
         }
       };
     },
     created() {
-      if (!this.isShehui) {
-        if (this.isHitokoto) {
-          this.getHitokoto();
-        } else {
-          this.getGuShi();
-        }
-      } else {
-        this.hitokoto.from = "";
-        this.hitokoto.from_who = "";
-        this.sendShehui();
-      }
+      this.getGuShi();
     },
 
     methods: {
-      sendShehui() {
-        let that = this;
-        let xhr = new XMLHttpRequest();
-        xhr.open('get', this.$constant.shehui);
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4) {
-            let shehui = xhr.responseText;
-            that.hitokoto.hitokoto = shehui.substring(1, shehui.length - 1);
-          }
-        };
-        xhr.send();
-      },
       getGuShi() {
         let that = this;
         let xhr = new XMLHttpRequest();
@@ -83,17 +45,6 @@
             that.guShi = JSON.parse(xhr.responseText);
           }
         };
-        xhr.send();
-      },
-      getHitokoto() {
-        let that = this;
-        let xhr = new XMLHttpRequest();
-        xhr.open('get', this.$constant.hitokoto);
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4) {
-            that.hitokoto = JSON.parse(xhr.responseText);
-          }
-        }
         xhr.send();
       }
     }

@@ -8,7 +8,7 @@
                 style="position: absolute"
                 v-once
                 lazy
-                :src="$store.state.webInfo.randomCover[Math.floor(Math.random() * $store.state.webInfo.randomCover.length)]"
+                :src="'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
                 fit="cover">
         <div slot="error" class="image-slot"></div>
       </el-image>
@@ -57,7 +57,7 @@
                 style="position: absolute"
                 v-once
                 lazy
-                :src="$store.state.webInfo.randomCover[Math.floor(Math.random() * $store.state.webInfo.randomCover.length)]"
+                :src="'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
                 fit="cover">
         <div slot="error" class="image-slot"></div>
       </el-image>
@@ -253,15 +253,16 @@
         }
 
         let user = {
-          account: this.account.trim(),
-          password: this.$common.encrypt(this.password.trim())
+          userName: this.account.trim(),
+          // password: this.$common.encrypt(this.password.trim())
+          password: this.password.trim()
         };
 
-        this.$http.post(this.$constant.baseURL + "/user/login", user, false, false)
+        this.$http.post(this.$constant.baseURL + "/userLogin/login", user, false)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
-              this.$store.commit("loadCurrentUser", res.data);
-              localStorage.setItem("userToken", res.data.accessToken);
+              this.$store.commit("loadCurrentUser", res.data.userName);
+              localStorage.setItem("userToken", res.data.token);
               this.account = "";
               this.password = "";
               this.$router.push({path: '/'});

@@ -99,19 +99,6 @@
           </div>
         </div>
 
-        <div class="article-info-news"
-             @click="weiYanDialogVisible = true"
-             v-if="!($store.state.currentUser === null) && $store.state.currentUser.id === article.userId">
-          <svg width="30" height="30" viewBox="0 0 1024 1024">
-            <path d="M0 0h1024v1024H0V0z" fill="#202425" opacity=".01"></path>
-            <path
-              d="M989.866667 512c0 263.918933-213.947733 477.866667-477.866667 477.866667S34.133333 775.918933 34.133333 512 248.081067 34.133333 512 34.133333s477.866667 213.947733 477.866667 477.866667z"
-              fill="#FF7744"></path>
-            <path
-              d="M512 221.866667A51.2 51.2 0 0 1 563.2 273.066667v187.733333H750.933333a51.2 51.2 0 0 1 0 102.4h-187.733333V750.933333a51.2 51.2 0 0 1-102.4 0v-187.733333H273.066667a51.2 51.2 0 0 1 0-102.4h187.733333V273.066667A51.2 51.2 0 0 1 512 221.866667z"
-              fill="#FFFFFF"></path>
-          </svg>
-        </div>
       </div>
       <!-- 文章 -->
       <div style="background: var(--background);">
@@ -134,7 +121,7 @@
           <div class="article-update-time">
             <span>文章最后更新于 {{ article.updateTime }}</span>
           </div>
-          <!-- 分类 -->e
+          <!-- 分类 -->
           <div class="article-sort">
             <span @click="$router.push({path: '/sort', query: {sortId: article.blogSortUid}})">{{ article.blogSort.sortName}}</span>
           </div>
@@ -151,24 +138,32 @@
               </span>
             </div>
           </blockquote>
-          <!-- 订阅 -->
-          <div class="myCenter" id="article-like" @click="subscribeLabel()">
-            <i class="el-icon-thumb article-like-icon" :class="{'article-like': subscribe}"></i>
-          </div>
+
+
 
           <!-- 评论 -->
           <div v-if="article.status === 1">
-            <comment :type="'article'" :source="article.uid" :userId="article.userUid"></comment>
+            <comment :type="'article'" :source="article.uid" :userId="article.userUid" @commentCommit="getArticle"></comment>
           </div>
+        </div>
+
+        <div id="buttons">
+          <button class="btn" @click="like">👍 点赞</button>
+          <button class="btn" @click="collect">💖 收藏</button>
+          <button class="btn" @click="share">🔁 转发</button>
         </div>
 
         <div id="toc" class="toc"></div>
       </div>
 
+
+
       <div style="background: var(--background)">
         <myFooter></myFooter>
       </div>
     </div>
+
+
 
     <div id="toc-button" @click="clickTocButton()">
       <i class="fa fa-align-justify" aria-hidden="true"></i>
@@ -336,6 +331,19 @@
             message: '已取消!'
           });
         });
+      },
+
+      like() {
+        console.log('点赞!');
+        // 在这里添加你的点赞逻辑
+      },
+      collect() {
+        console.log('收藏!');
+        // 在这里添加你的收藏逻辑
+      },
+      share() {
+        console.log('转发!');
+        // 在这里添加你的转发逻辑
       },
 
       deleteTreeHole(id) {
@@ -508,6 +516,31 @@
 </script>
 
 <style scoped>
+
+  #buttons {
+    position: fixed;
+    right: 3.5vh;
+    bottom: 15vh;
+    animation: slide-bottom 0.5s ease-in-out both;
+    z-index: 100;
+    cursor: pointer;
+    font-size: 30px;
+    width: 30px;
+  }
+
+  .btn {
+    background-color: #fff;
+    color: #808080;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn:hover {
+    background-color: #f2f2f2;
+  }
 
   .article-head {
     height: 40vh;
@@ -685,6 +718,10 @@
     color: var(--themeBackground);
   }
 
+  #buttons:hover {
+    color: var(--themeBackground);
+  }
+
   .copyright-container {
     color: var(--black);
     line-height: 2.5;
@@ -705,6 +742,12 @@
 
   @media screen and (max-width: 400px) {
     #toc-button {
+      right: 0.5vh;
+    }
+  }
+
+  @media screen and (max-width: 400px) {
+    #buttons {
       right: 0.5vh;
     }
   }

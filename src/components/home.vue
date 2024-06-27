@@ -85,7 +85,7 @@
                   </el-dropdown-item>
                   <el-dropdown-item @click.native="$router.push({path: '/user'})"
                                     v-if="$common.isEmpty($store.state.currentUser)">
-                    <i class="fa fa-sign-in" aria-hidden="true"></i> <span>登陆</span>
+                    <i class="fa fa-sign-in" aria-hidden="true"></i> <span>登录</span>
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>

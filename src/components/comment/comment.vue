@@ -261,6 +261,7 @@
             }
             this.getComments(this.pagination);
             this.getTotal();
+            this.$emit('commentCommit');
           })
           .catch((error) => {
             this.$message({

@@ -1,8 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Login from '../views/login/Login'
-import Register from '../views/register/Register'
-import Home from '../views/home/Home'
 
 const originalPush = VueRouter.prototype.push;
 VueRouter.prototype.push = function push(location) {
@@ -12,21 +9,6 @@ VueRouter.prototype.push = function push(location) {
 Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: '/home',
-    name: 'home',
-    component: Home
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: Login
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: Register
-  },
   // {
   //   path: '/',
   //   redirect: '/login'
