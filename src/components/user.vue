@@ -16,7 +16,7 @@
         <div class="form-container sign-up-container">
           <div class="myCenter">
             <h1>注册</h1>
-            <input v-model="username" type="text" maxlength="30" placeholder="用户名">
+            <input v-model="userName" type="text" maxlength="30" placeholder="用户名">
             <input v-model="password" type="password" maxlength="30" placeholder="密码">
             <input v-model="email" type="email" placeholder="邮箱">
             <input v-model="code" type="text" placeholder="验证码" disabled>
@@ -27,7 +27,7 @@
         <div class="form-container sign-in-container">
           <div class="myCenter">
             <h1>登录</h1>
-            <input v-model="account" type="text" placeholder="用户名/邮箱/手机号">
+            <input v-model="userName" type="text" placeholder="用户名/邮箱/手机号">
             <input v-model="password" type="password" placeholder="密码">
             <a href="#" @click="changeDialog('找回密码')">忘记密码？</a>
             <button @click="login()">登录</button>
@@ -77,7 +77,7 @@
             </div>
             <div class="user-content">
               <div>
-                <el-input maxlength="30" v-model="currentUser.username"></el-input>
+                <el-input maxlength="30" v-model="currentUser"></el-input>
               </div>
               <div>
                 <div v-if="!$common.isEmpty(currentUser.phoneNumber)">
@@ -214,8 +214,7 @@
     data() {
       return {
         currentUser: this.$store.state.currentUser,
-        username: "",
-        account: "",
+        userName: "",
         password: "",
         phoneNumber: "",
         email: "",
@@ -244,7 +243,7 @@
         document.querySelector("#loginAndRegist").classList.remove('right-panel-active');
       },
       login() {
-        if (this.$common.isEmpty(this.account) || this.$common.isEmpty(this.password)) {
+        if (this.$common.isEmpty(this.userName) || this.$common.isEmpty(this.password)) {
           this.$message({
             message: "请输入账号或密码！",
             type: "error"
@@ -253,7 +252,7 @@
         }
 
         let user = {
-          userName: this.account.trim(),
+          userName: this.userName.trim(),
           // password: this.$common.encrypt(this.password.trim())
           password: this.password.trim()
         };
@@ -263,7 +262,7 @@
             if (!this.$common.isEmpty(res.data)) {
               this.$store.commit("loadCurrentUser", res.data.userName);
               localStorage.setItem("userToken", res.data.token);
-              this.account = "";
+              this.userName = "";
               this.password = "";
               this.$router.push({path: '/'});
             }
@@ -276,7 +275,7 @@
           });
       },
       regist() {
-        if (this.$common.isEmpty(this.username) || this.$common.isEmpty(this.password)) {
+        if (this.$common.isEmpty(this.userName) || this.$common.isEmpty(this.password)) {
           this.$message({
             message: "请输入用户名或密码！",
             type: "error"
@@ -300,7 +299,7 @@
           return;
         }
 
-        if (this.username.indexOf(" ") !== -1 || this.password.indexOf(" ") !== -1) {
+        if (this.userName.indexOf(" ") !== -1 || this.password.indexOf(" ") !== -1) {
           this.$message({
             message: "用户名或密码不能包含空格！",
             type: "error"
@@ -309,25 +308,24 @@
         }
 
         let user = {
-          username: this.username.trim(),
-          code: this.code.trim(),
-          password: this.$common.encrypt(this.password.trim())
+          userName: this.userName.trim(),
+          verCode: this.code.trim(),
+          // password: this.$common.encrypt(this.password.trim())
+          password: this.password.trim()
         };
 
         if (this.dialogTitle === "邮箱验证码") {
           user.email = this.email;
         }
 
-        this.$http.post(this.$constant.baseURL + "/user/regist", user)
+        this.$http.post(this.$constant.baseURL + "/user/register", user)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
-              this.$store.commit("loadCurrentUser", res.data);
-              localStorage.setItem("userToken", res.data.accessToken);
-              this.username = "";
+              this.userName = "";
               this.password = "";
-              this.$router.push({path: '/'});
-              let userToken = this.$common.encrypt(localStorage.getItem("userToken"));
-              window.open(this.$constant.imBaseURL + "?userToken=" + userToken);
+              this.email = "";
+              this.code = "";
+              this.signIn()
             }
           })
           .catch((error) => {
@@ -343,7 +341,7 @@
         }
 
         let user = {
-          username: this.currentUser.username,
+          userName: this.currentUser,
           gender: this.currentUser.gender
         };
 
@@ -383,7 +381,6 @@
       },
       checkParams(params) {
         if (this.dialogTitle === "修改手机号" || this.dialogTitle === "绑定手机号" || (this.dialogTitle === "找回密码" && this.passwordFlag === 1)) {
-          params.flag = 1;
           if (this.$common.isEmpty(this.phoneNumber)) {
             this.$message({
               message: "请输入手机号！",
@@ -401,7 +398,6 @@
           params.place = this.phoneNumber;
           return true;
         } else if (this.dialogTitle === "修改邮箱" || this.dialogTitle === "绑定邮箱" || this.dialogTitle === "邮箱验证码" || (this.dialogTitle === "找回密码" && this.passwordFlag === 2)) {
-          params.flag = 2;
           if (this.$common.isEmpty(this.email)) {
             this.$message({
               message: "请输入邮箱！",
@@ -416,13 +412,13 @@
             });
             return false;
           }
-          params.place = this.email;
+          params.tos = this.email;
           return true;
         }
         return false;
       },
       checkParameters() {
-        if (this.$common.isEmpty(this.currentUser.username)) {
+        if (this.$common.isEmpty(this.currentUser)) {
           this.$message({
             message: "请输入用户名！",
             type: "error"
@@ -430,7 +426,7 @@
           return false;
         }
 
-        if (this.currentUser.username.indexOf(" ") !== -1) {
+        if (this.currentUser.indexOf(" ") !== -1) {
           this.$message({
             message: "用户名不能包含空格！",
             type: "error"
@@ -575,12 +571,12 @@
 
           let url;
           if (this.dialogTitle === "找回密码" || this.dialogTitle === "邮箱验证码") {
-            url = "/user/getCodeForForgetPassword";
+            url = "/email/sendVerMail";
           } else {
             url = "/user/getCodeForBind";
           }
 
-          this.$http.get(this.$constant.baseURL + url, params)
+          this.$http.post(this.$constant.baseURL + url, params)
             .then((res) => {
               this.$message({
                 message: "验证码已发送，请注意查收！",

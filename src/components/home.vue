@@ -339,7 +339,7 @@
               type: "error"
             });
           });
-        this.$store.commit("loadCurrentUser", {});
+        this.$store.commit("loadCurrentUser", "");
         localStorage.removeItem("userToken");
         this.$router.push({path: '/'});
       },
