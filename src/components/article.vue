@@ -148,7 +148,7 @@
         </div>
 
         <div id="buttons">
-          <button class="btn" @click="like">👍 点赞</button>
+          <button class="btn" @click="likeOrCancel">👍 点赞</button>
           <button class="btn" @click="collect">💖 收藏</button>
           <button class="btn" @click="share">🔁 转发</button>
         </div>
@@ -244,6 +244,7 @@
             sortName: ''
           }
         },
+        flag: false,
         articleContentHtml: "",
         treeHoleList: [],
         weiYanDialogVisible: false,
@@ -333,7 +334,22 @@
         });
       },
 
+
+      likeOrCancel(){
+        this.flag = !this.flag;
+        this.like()
+      },
+
       like() {
+        this.$http.get(this.$constant.baseURL + "/blog/updateLikeCount",{uid: this.id, flag: this.flag})
+          .then((res => {
+            this.getArticle();
+          })).catch((error) => {
+            this.$message({
+              message: error.message,
+              type: "error"
+            });
+          });
         console.log('点赞!');
         // 在这里添加你的点赞逻辑
       },
