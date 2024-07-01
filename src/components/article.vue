@@ -237,6 +237,10 @@
 
     data() {
       return {
+        param: {
+          uid: '',
+          userUid: ''
+        },
         id: this.$route.params.id,
         subscribe: false,
         article: {
@@ -244,7 +248,8 @@
             sortName: ''
           }
         },
-        flag: false,
+        isLike: false,
+        isRecord: false,
         articleContentHtml: "",
         treeHoleList: [],
         weiYanDialogVisible: false,
@@ -336,12 +341,13 @@
 
 
       likeOrCancel(){
-        this.flag = !this.flag;
-        this.like()
+        this.like();
+
+        console.log(this.isLike)
       },
 
       like() {
-        this.$http.get(this.$constant.baseURL + "/blog/updateLikeCount",{uid: this.id, flag: this.flag})
+        this.$http.get(this.$constant.baseURL + "/blog/updateLikeCount",{uid: this.id, userUid: this.$store.state.currentUser.id, flag: this.isLike})
           .then((res => {
             this.getArticle();
           })).catch((error) => {
@@ -434,10 +440,14 @@
         headings.attr('id', (i, id) => id || 'toc-' + i);
       },
       getArticle() {
-        this.$http.get(this.$constant.baseURL + "/blog/selectOneByUid", {uid: this.id})
+        this.param.uid = this.id;
+        this.param.userUid= this.$store.state.currentUser.id;
+        this.$http.get(this.$constant.baseURL + "/blog/selectOneByUid", this.param)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.article = res.data;
+              this.isRecord = res.data.record;
+              this.isLike = res.data.like;
               // const md = new MarkdownIt({breaks: true}).use(require('markdown-it-multimd-table'));
               // this.articleContentHtml = md.render(this.article.content);
               this.articleContentHtml = this.article.content

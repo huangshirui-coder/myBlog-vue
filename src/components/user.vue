@@ -213,7 +213,7 @@
     },
     data() {
       return {
-        currentUser: this.$store.state.currentUser,
+        currentUser: this.$store.state.currentUser.userName,
         userName: "",
         password: "",
         phoneNumber: "",
@@ -260,7 +260,7 @@
         this.$http.post(this.$constant.baseURL + "/userLogin/login", user, false)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
-              this.$store.commit("loadCurrentUser", res.data.userName);
+              this.$store.commit("loadCurrentUser", res.data.user);
               localStorage.setItem("userToken", res.data.token);
               this.userName = "";
               this.password = "";
@@ -359,7 +359,7 @@
             .then((res) => {
               if (!this.$common.isEmpty(res.data)) {
                 this.$store.commit("loadCurrentUser", res.data);
-                this.currentUser = this.$store.state.currentUser;
+                this.currentUser = this.$store.state.currentUser.userName;
                 this.$message({
                   message: "修改成功！",
                   type: "success"
@@ -472,7 +472,7 @@
               .then((res) => {
                 if (!this.$common.isEmpty(res.data)) {
                   this.$store.commit("loadCurrentUser", res.data);
-                  this.currentUser = this.$store.state.currentUser;
+                  this.currentUser = this.$store.state.currentUser.userName;
                   this.clearDialog();
                   this.$message({
                     message: "修改成功！",
@@ -545,7 +545,7 @@
             .then((res) => {
               if (!this.$common.isEmpty(res.data)) {
                 this.$store.commit("loadCurrentUser", res.data);
-                this.currentUser = this.$store.state.currentUser;
+                this.currentUser = this.$store.state.currentUser.userName;
                 this.clearDialog();
                 this.$message({
                   message: "修改成功！",
