@@ -2,7 +2,7 @@ export default {
   // 测试环境
   baseURL: "http://localhost:8088",
   imBaseURL: "http://localhost:8088/im",
-  webURL: "http://localhost",
+  webURL: "http://localhost:8080",
 
   // 生产环境
   // webURL: location.protocol + "//" + location.hostname + (location.port ? ':' + location.port : ''),
