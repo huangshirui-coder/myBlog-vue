@@ -61,16 +61,23 @@
         this.$http.post(this.$constant.baseURL + "/userLogin/login", user, true)
           .then((res) => {
             if (!this.$common.isEmpty(res.data.user) && res.data.user.role === "admin") {
-              localStorage.setItem("adminToken", res.data.accessToken);
+              localStorage.setItem("adminToken", res.data.token);
+              console.log(res.data.token)
+              console.log(localStorage.getItem("adminToken"));
               this.$store.commit("loadCurrentAdmin", res.data.user);
               this.account = "";
               this.password = "";
               this.$router.push({path: this.redirect});
+            }else{
+              this.$message({
+                message: "您无登录权限，请与管理员联系!",
+                type: "error"
+              });
             }
           })
           .catch((error) => {
             this.$message({
-              message: error.message,
+              message: "登录失败，请检查用户名或密码！",
               type: "error"
             });
           });

@@ -58,7 +58,7 @@
 
     methods: {
       logout() {
-        this.$http.get(this.$constant.baseURL + "/user/logout", {}, true)
+        this.$http.get(this.$constant.baseURL + "/userLogin/logout", {}, true)
           .then((res) => {
           })
           .catch((error) => {
