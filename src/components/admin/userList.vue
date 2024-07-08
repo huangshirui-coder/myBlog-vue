@@ -2,30 +2,23 @@
   <div>
     <div>
       <div class="handle-box">
-        <el-select v-model="pagination.userType" placeholder="用户类型" class="handle-select mrb10">
-          <el-option key="1" label="站长" :value="0"></el-option>
-          <el-option key="2" label="管理员" :value="1"></el-option>
-          <el-option key="3" label="普通用户" :value="2"></el-option>
+        <el-select v-model="queryUser.userType" placeholder="用户类型" class="handle-select mrb10">
+          <el-option key="1" label="管理员" :value="0"></el-option>
+          <el-option key="2" label="普通用户" :value="1"></el-option>
         </el-select>
-        <el-select v-model="pagination.userStatus" placeholder="用户状态" class="handle-select mrb10">
-          <el-option key="1" label="启用" :value="true"></el-option>
-          <el-option key="2" label="禁用" :value="false"></el-option>
+        <el-select v-model="queryUser.status" placeholder="用户状态" class="handle-select mrb10">
+          <el-option key="1" label="启用" :value="0"></el-option>
+          <el-option key="2" label="禁用" :value="1"></el-option>
         </el-select>
-        <el-input v-model="pagination.searchKey" placeholder="用户名/手机号/邮箱" class="handle-input mrb10"></el-input>
+        <el-input v-model="queryUser.searchKey" placeholder="用户名/手机号/邮箱" class="handle-input mrb10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="searchUser()">搜索</el-button>
         <el-button type="danger" @click="clearSearch()">清除参数</el-button>
       </div>
       <el-table :data="users" border class="table" header-cell-class-name="table-header">
-        <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
-        <el-table-column prop="username" label="用户名" align="center"></el-table-column>
-        <el-table-column prop="phoneNumber" label="手机号" align="center"></el-table-column>
+        <el-table-column prop="id" label="ID" width="70" align="center" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="userName" label="用户名" align="center"></el-table-column>
+        <el-table-column prop="phonenumber" label="手机号" align="center"></el-table-column>
         <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
-        <el-table-column label="赞赏" width="100" align="center">
-          <template slot-scope="scope">
-            <el-input size="medium" maxlength="30" v-model="scope.row.admire"
-                      @blur="changeUserAdmire(scope.row)"></el-input>
-          </template>
-        </el-table-column>
         <el-table-column label="用户状态" align="center">
           <template slot-scope="scope">
             <el-tag :type="scope.row.userStatus === false ? 'danger' : 'success'"
@@ -43,12 +36,12 @@
         <el-table-column label="性别" align="center">
           <template slot-scope="scope">
             <el-tag type="success"
-                    v-if="scope.row.gender === 1"
+                    v-if="scope.row.sex === 0"
                     disable-transitions>
               男
             </el-tag>
             <el-tag type="success"
-                    v-else-if="scope.row.gender === 2"
+                    v-else-if="scope.row.sex === 1"
                     disable-transitions>
               女
             </el-tag>
@@ -59,23 +52,15 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="introduction" label="简介" align="center"></el-table-column>
         <el-table-column label="用户类型" width="100" align="center">
           <template slot-scope="scope">
             <el-tag type="success"
                     v-if="scope.row.userType === 0"
                     disable-transitions>
-              站长
-            </el-tag>
-            <el-tag type="success"
-                    v-else-if="scope.row.userType === 1"
-                    style="cursor: pointer"
-                    @click.native="editUser(scope.row)"
-                    disable-transitions>
               管理员
             </el-tag>
             <el-tag type="success"
-                    v-else
+                    v-else-if="scope.row.userType === 1"
                     style="cursor: pointer"
                     @click.native="editUser(scope.row)"
                     disable-transitions>
@@ -87,9 +72,9 @@
       </el-table>
       <div class="pagination">
         <el-pagination background layout="total, prev, pager, next"
-                       :current-page="pagination.current"
-                       :page-size="pagination.size"
-                       :total="pagination.total"
+                       :current-page="queryUser.pageNum"
+                       :page-size="queryUser.pageSize"
+                       :total="total"
                        @current-change="handlePageChange">
         </el-pagination>
       </div>
@@ -105,15 +90,15 @@
                center>
       <div class="myCenter">
         <el-radio-group v-model="changeUser.userType">
-          <el-radio-button :label="1">管理员</el-radio-button>
-          <el-radio-button :label="2">普通用户</el-radio-button>
+          <el-radio-button :label="0">管理员</el-radio-button>
+          <el-radio-button :label="1">普通用户</el-radio-button>
         </el-radio-group>
       </div>
 
       <span slot="footer" class="dialog-footer">
           <el-button @click="handleClose()">取 消</el-button>
           <el-button type="primary" @click="saveEdit()">确 定</el-button>
-        </span>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -124,13 +109,21 @@
     data() {
       return {
         pagination: {
-          current: 1,
-          size: 10,
+          pageNum: 1,
+          pageSize: 10,
           total: 0,
           searchKey: "",
           userStatus: null,
           userType: null
         },
+        queryUser: {
+          pageNum: 1,
+          pageSize: 10,
+          searchKey: "",
+          status: null,
+          userType: null
+        },
+        total: 0,
         users: [],
         changeUser: {
           id: null,
@@ -153,22 +146,21 @@
 
     methods: {
       clearSearch() {
-        this.pagination = {
-          current: 1,
-          size: 10,
-          total: 0,
+        this.queryUser = {
+          pageNum: 1,
+          pageSize: 10,
           searchKey: "",
-          userStatus: null,
+          status: null,
           userType: null
         }
         this.getUsers();
       },
       getUsers() {
-        this.$http.post(this.$constant.baseURL + "/admin/user/list", this.pagination, true)
+        this.$http.get(this.$constant.baseURL + "/user/pageList", this.queryUser, true)
           .then((res) => {
-            if (!this.$common.isEmpty(res.data)) {
-              this.users = res.data.records;
-              this.pagination.total = res.data.total;
+            if (!this.$common.isEmpty(res.code === 200)) {
+              this.users = res.rows;
+              this.total = res.total;
             }
           })
           .catch((error) => {
@@ -234,12 +226,12 @@
         this.editVisible = true;
       },
       handlePageChange(val) {
-        this.pagination.current = val;
+        this.pagination.pageNum = val;
         this.getUsers();
       },
       searchUser() {
-        this.pagination.total = 0;
-        this.pagination.current = 1;
+        this.total = 0;
+        this.queryUser.pageNum = 1;
         this.getUsers();
       },
       handleClose() {
@@ -250,7 +242,7 @@
         this.editVisible = false;
       },
       saveEdit() {
-        this.$http.get(this.$constant.baseURL + "/admin/user/changeUserType", {
+        this.$http.get(this.$constant.baseURL + "/user/changeUserType", {
           userId: this.changeUser.id,
           userType: this.changeUser.userType
         }, true)
