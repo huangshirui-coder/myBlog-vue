@@ -62,8 +62,6 @@
           .then((res) => {
             if (!this.$common.isEmpty(res.data.user) && res.data.user.role === "admin") {
               localStorage.setItem("adminToken", res.data.token);
-              console.log(res.data.token)
-              console.log(localStorage.getItem("adminToken"));
               this.$store.commit("loadCurrentAdmin", res.data.user);
               this.account = "";
               this.password = "";

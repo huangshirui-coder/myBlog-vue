@@ -62,8 +62,6 @@ export default new Vuex.Store({
       localStorage.setItem("currentAdmin", JSON.stringify(user));
     },
     loadWebInfo(state, webInfo) {
-      webInfo.webWelcome = webInfo.webWelcome.split(' ');
-      webInfo.webNotices = webInfo.webNotices.split(' ');
       state.webInfo = webInfo;
       localStorage.setItem("webInfo", JSON.stringify(webInfo));
     }

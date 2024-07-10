@@ -21,11 +21,11 @@
         <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
         <el-table-column label="用户状态" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.userStatus === false ? 'danger' : 'success'"
+            <el-tag :type="scope.row.status === false ? 'danger' : 'success'"
                     disable-transitions>
-              {{scope.row.userStatus === false ? '禁用' : '启用'}}
+              {{scope.row.status === false ? '禁用' : '启用'}}
             </el-tag>
-            <el-switch v-if="scope.row.id !== $store.state.currentAdmin.id" @click.native="changeUserStatus(scope.row)" v-model="scope.row.userStatus"></el-switch>
+            <el-switch v-if="scope.row.id !== $store.state.currentAdmin.id" @click.native="changeUserStatus(scope.row)" v-model="scope.row.status"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="头像" align="center">
@@ -171,9 +171,9 @@
           });
       },
       changeUserStatus(user) {
-        this.$http.get(this.$constant.baseURL + "/admin/user/changeUserStatus", {
-          userId: user.id,
-          flag: user.userStatus
+        this.$http.get(this.$constant.baseURL + "/user/changeUserStatus", {
+          id: user.id,
+          status: user.status
         }, true)
           .then((res) => {
             this.$message({
@@ -188,38 +188,7 @@
             });
           });
       },
-      changeUserAdmire(user) {
-        if (!this.$common.isEmpty(user.admire)) {
-          this.$confirm('确认保存？', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'success',
-            center: true
-          }).then(() => {
-            this.$http.get(this.$constant.baseURL + "/admin/user/changeUserAdmire", {
-              userId: user.id,
-              admire: user.admire
-            }, true)
-              .then((res) => {
-                this.$message({
-                  message: "修改成功！",
-                  type: "success"
-                });
-              })
-              .catch((error) => {
-                this.$message({
-                  message: error.message,
-                  type: "error"
-                });
-              });
-          }).catch(() => {
-            this.$message({
-              type: 'success',
-              message: '已取消保存!'
-            });
-          });
-        }
-      },
+
       editUser(user) {
         this.changeUser.id = user.id;
         this.changeUser.userType = user.userType;
@@ -243,7 +212,7 @@
       },
       saveEdit() {
         this.$http.get(this.$constant.baseURL + "/user/changeUserType", {
-          userId: this.changeUser.id,
+          id: this.changeUser.id,
           userType: this.changeUser.userType
         }, true)
           .then((res) => {

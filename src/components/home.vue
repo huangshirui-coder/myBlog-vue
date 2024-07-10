@@ -230,7 +230,7 @@
   export default {
     data() {
       return {
-        toolButton: false,
+        toolButton: true,
         hoverEnter: false,
         mouseAnimation: false,
         isDark: false,
@@ -265,7 +265,7 @@
         //如果滑动距离超过屏幕高度三分之一视为进入页面，背景改为白色
         let enter = scrollTop > window.innerHeight / 2;
         const top = scrollTop - oldScrollTop < 0;
-        let isShow = scrollTop - window.innerHeight > 30;
+        let isShow = scrollTop - window.innerHeight > -50;
         this.toolButton = isShow;
         if (isShow && !this.$common.mobile()) {
           if (window.innerHeight > 950) {
@@ -350,6 +350,15 @@
             if (!this.$common.isEmpty(res.data)) {
               this.$store.commit("loadWebInfo", res.data);
             }
+            if (res === 400){
+              this.$store.commit("loadCurrentUser", "");
+              localStorage.setItem("userToken", "");
+              this.$message({
+                message: "登录身份过期，请重新登录！",
+                type: "error"
+              });
+              this.$router.push({path: '/user'})
+            }
           })
           .catch((error) => {
             this.$message({
@@ -403,9 +412,9 @@
           behavior: "smooth"
         });
       },
-      // onScrollPage() {
-      //   this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      // },
+      onScrollPage() {
+        this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      },
       isDaylight() {
         let currDate = new Date();
         if (currDate.getHours() > 22 || currDate.getHours() < 7) {
