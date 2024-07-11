@@ -55,17 +55,26 @@
 
       <!-- 今日访问 -->
       <div>
-        <div class="history-title">今日访问</div>
+        <div class="history-title">访问人员</div>
         <div>
           <div style="width: 250px;margin: 0 auto;display: flex;justify-content: center">
-            <div class="history-name" style="line-height: 35px">今日访问量：</div>
+            <div class="history-name" style="line-height: 35px">该日访问量：</div>
             <div style="color:var(--maxLightRed);font-weight: bold;font-size: 30px;line-height: 35px">
               {{visitList.length}}
             </div>
           </div>
           <div class="history-info" style="width: 640px">
             <div style="margin-right: 40px">
-              <div class="history-name">今日访问用户</div>
+              <el-row>
+                <span style="font-size: 18px;font-weight: bold;margin: 0 10px 10px 0;">该日访问用户</span>
+                <el-date-picker
+                  v-model="time"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  @change="getVisitList"
+                  placeholder="选择日期">
+                </el-date-picker>
+              </el-row>
               <div class="history-avatar">
                 <el-table :data="visitList">
                   <el-table-column
@@ -107,7 +116,8 @@
     data() {
       return {
         visitList: {},
-        time: "",
+        time: new Date().toISOString().substr(0, 10),
+        defaultTime: new Date().toISOString().substr(0, 10),
         prov: {},
         count: 0
       }
@@ -128,9 +138,9 @@
 
     methods: {
       getVisitList() {
-        this.$http.get(this.$constant.baseURL + "/webInfo/getVisitList", {time: "2024-07-08"}, true)
+        this.$http.get(this.$constant.baseURL + "/webInfo/getVisitList", {time: this.time}, true)
           .then((res) => {
-            if (!this.$common.isEmpty(res.data)) {
+            if (res.code === 200) {
               this.visitList = res.data;
             }
           })

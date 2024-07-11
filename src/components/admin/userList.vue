@@ -3,12 +3,12 @@
     <div>
       <div class="handle-box">
         <el-select v-model="queryUser.userType" placeholder="用户类型" class="handle-select mrb10">
-          <el-option key="1" label="管理员" :value="0"></el-option>
-          <el-option key="2" label="普通用户" :value="1"></el-option>
+          <el-option key="0" label="管理员" :value="0"></el-option>
+          <el-option key="1" label="普通用户" :value="1"></el-option>
         </el-select>
         <el-select v-model="queryUser.status" placeholder="用户状态" class="handle-select mrb10">
-          <el-option key="1" label="启用" :value="0"></el-option>
-          <el-option key="2" label="禁用" :value="1"></el-option>
+          <el-option key="0" label="启用" :value="0"></el-option>
+          <el-option key="1" label="禁用" :value="1"></el-option>
         </el-select>
         <el-input v-model="queryUser.searchKey" placeholder="用户名/手机号/邮箱" class="handle-input mrb10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="searchUser()">搜索</el-button>
@@ -21,11 +21,11 @@
         <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
         <el-table-column label="用户状态" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status === false ? 'danger' : 'success'"
-                    disable-transitions>
-              {{scope.row.status === false ? '禁用' : '启用'}}
+            <el-tag :type="scope.row.status === 0 ? 'danger' : 'success'"
+                    >
+              {{scope.row.status === 0 ? '禁用' : '启用'}}
             </el-tag>
-            <el-switch v-if="scope.row.id !== $store.state.currentAdmin.id" @click.native="changeUserStatus(scope.row)" v-model="scope.row.status"></el-switch>
+            <el-switch v-if="scope.row.id !== $store.state.currentAdmin.id" @change="changeUserStatus(scope.row)" v-model="scope.row.status" active-value="0" inactive-value="1"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="头像" align="center">
@@ -56,6 +56,7 @@
           <template slot-scope="scope">
             <el-tag type="success"
                     v-if="scope.row.userType === 0"
+                    @click.native="editUser(scope.row)"
                     disable-transitions>
               管理员
             </el-tag>
@@ -108,14 +109,6 @@
   export default {
     data() {
       return {
-        pagination: {
-          pageNum: 1,
-          pageSize: 10,
-          total: 0,
-          searchKey: "",
-          userStatus: null,
-          userType: null
-        },
         queryUser: {
           pageNum: 1,
           pageSize: 10,
@@ -160,6 +153,7 @@
           .then((res) => {
             if (!this.$common.isEmpty(res.code === 200)) {
               this.users = res.rows;
+              console.log(this.users)
               this.total = res.total;
             }
           })
