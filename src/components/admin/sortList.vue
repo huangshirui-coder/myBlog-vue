@@ -7,7 +7,12 @@
       <el-table-column type="index" label="ID" width="55" align="center" show-overflow-tooltip></el-table-column>
       <el-table-column prop="sortName" label="分类名称" align="center"></el-table-column>
       <el-table-column prop="content" label="分类描述" align="center"></el-table-column>
-      <el-table-column prop="status" label="启用状态" align="center"></el-table-column>
+      <el-table-column label="启用状态" align="center">
+        <template v-slot="scope">
+          <el-tag :type="scope.row.status === 0 ? 'danger' : 'success'"
+            @click="changeSortStatus(scope.row)">{{scope.row.status === 0 ? "禁用" : "启用"}}</el-tag>
+        </template>
+      </el-table-column>
 <!--      <el-table-column label="启用状态" align="center">-->
 <!--        <template slot-scope="scope">-->
 <!--          <el-switch @change="changeStatus(scope.row)"-->
@@ -43,7 +48,12 @@
         <span>{{sort.sortName}}</span>
       </el-table-column>
       <el-table-column prop="content" label="标签名称" align="center"></el-table-column>
-      <el-table-column prop="status" label="启用状态" align="center"></el-table-column>
+      <el-table-column label="启用状态" align="center">
+        <template v-slot="scope">
+          <el-tag :type="scope.row.status === 0 ? 'danger' : 'success'"
+                  @click="changeTagStatus(scope.row)">{{scope.row.status === 0 ? "禁用" : "启用"}}</el-tag>
+        </template>
+      </el-table-column>
 <!--      <el-table-column label="启用状态" align="center">-->
 <!--        <template slot-scope="scope">-->
 <!--          <el-switch @change="changeStatus(scope.row)"-->
@@ -153,8 +163,52 @@
     },
 
     methods: {
-      changeStatus(blogsort){
-        console.log(blogsort)
+      changeSortStatus(blogsort){
+        blogsort.status = 1 - blogsort.status;
+        this.$http.post(this.$constant.baseURL + "/blogsort/updateStatus", blogsort, true)
+          .then((res)=>{
+            if (res.code === 200){
+              this.getSortInfo();
+              this.$message({
+                message: res.msg,
+                type: "success"
+              })
+            }else {
+              this.$message({
+                message: res.msg,
+                type: "error"
+              })
+            }
+          }).catch((err)=>{
+          this.$message({
+            message: err.message,
+            type: "error"
+          })
+        })
+      },
+
+      changeTagStatus(tag){
+        tag.status = 1 - tag.status
+        this.$http.post(this.$constant.baseURL + "/tag/updateStatus", tag, true)
+          .then((res)=>{
+            if (res.code === 200){
+              this.getSortInfo();
+              this.$message({
+                message: res.msg,
+                type: "success"
+              })
+            }else {
+              this.$message({
+                message: res.msg,
+                type: "error"
+              })
+            }
+          }).catch((err)=>{
+          this.$message({
+            message: err.message,
+            type: "error"
+          })
+        })
       },
 
       deleteHandle(id, flag) {
