@@ -22,14 +22,37 @@
     watch: {},
 
     created() {
-
+      this.test();
     },
 
     mounted() {
-
+      this.test();
     },
 
-    methods: {}
+    destroyed() {
+      this.test();
+    },
+
+    methods: {
+      test(){
+        this.$http.get(this.$constant.baseURL + "/userLogin/test",{}, true)
+          .then((res)=>{
+            if (res === 400){
+              localStorage.setItem("adminToken", "");
+              this.$store.commit("loadCurrentAdmin", "");
+              this.$message({
+                message: "登录信息过期，请重新登录！",
+                type: "error"
+              });
+            }
+          }).catch((error)=>{
+          this.$message({
+            message: error.message,
+            type: "error"
+          });
+        });
+      },
+    }
   }
 </script>
 

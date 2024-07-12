@@ -3,18 +3,19 @@
     <div style="margin-bottom: 20px">
       <el-button type="primary" @click="sortDialog = true">新增分类</el-button>
     </div>
-    <el-table :data="sortInfo" border class="table" header-cell-class-name="table-header">
-      <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
+    <el-table :data="sortInfo" border class="table"  header-cell-class-name="table-header">
+      <el-table-column type="index" label="ID" width="55" align="center" show-overflow-tooltip></el-table-column>
       <el-table-column prop="sortName" label="分类名称" align="center"></el-table-column>
-      <el-table-column prop="sortDescription" label="分类描述" align="center"></el-table-column>
-      <el-table-column label="分类类型" align="center">
-        <template slot-scope="scope">
-          <span v-if="scope.row.sortType === 0">导航栏分类</span>
-          <span v-else-if="scope.row.sortType === 1">普通分类</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="priority" label="分类优先级" align="center"></el-table-column>
-      <el-table-column prop="countOfSort" label="文章总数" align="center"></el-table-column>
+      <el-table-column prop="content" label="分类描述" align="center"></el-table-column>
+      <el-table-column prop="status" label="启用状态" align="center"></el-table-column>
+<!--      <el-table-column label="启用状态" align="center">-->
+<!--        <template slot-scope="scope">-->
+<!--          <el-switch @change="changeStatus(scope.row)"-->
+<!--                     v-model="scope.row.status">-->
+<!--          </el-switch>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+      <el-table-column prop="sort" label="分类优先级" align="center"></el-table-column>
       <el-table-column label="操作" width="380" align="center">
         <template slot-scope="scope">
           <el-button type="text" icon="el-icon-edit" @click="editSort(scope.row)">
@@ -34,16 +35,24 @@
       </el-table-column>
     </el-table>
 
-    <el-table v-if="!$common.isEmpty(sort)" :data="sort.labels" border class="table"
+    <el-table v-if="!$common.isEmpty(sort)" :data="sort.tagList" border class="table"
               style="margin-top: 40px"
               header-cell-class-name="table-header">
-      <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
+      <el-table-column type="index" label="ID" width="55" align="center" show-overflow-tooltip></el-table-column>
       <el-table-column label="分类名称" align="center">
         <span>{{sort.sortName}}</span>
       </el-table-column>
-      <el-table-column prop="labelName" label="标签名称" align="center"></el-table-column>
-      <el-table-column prop="labelDescription" label="标签描述" align="center"></el-table-column>
-      <el-table-column prop="countOfLabel" label="文章总数" align="center"></el-table-column>
+      <el-table-column prop="content" label="标签名称" align="center"></el-table-column>
+      <el-table-column prop="status" label="启用状态" align="center"></el-table-column>
+<!--      <el-table-column label="启用状态" align="center">-->
+<!--        <template slot-scope="scope">-->
+<!--          <el-switch @change="changeStatus(scope.row)"-->
+<!--                     v-model="scope.row.status">-->
+<!--          </el-switch>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+      <el-table-column prop="clickCount" label="点击数" align="center"></el-table-column>
+      <el-table-column prop="sort" label="优先级" align="center"></el-table-column>
       <el-table-column label="操作" width="320" align="center">
         <template slot-scope="scope">
           <el-button type="text" icon="el-icon-edit" @click="editLabel(scope.row)">
@@ -65,20 +74,14 @@
                destroy-on-close
                center>
       <div class="my-dialog">
-        <div class="myCenter">
-          <el-radio-group v-model="sortForHttp.sortType">
-            <el-radio-button :label="0">导航栏分类</el-radio-button>
-            <el-radio-button :label="1">普通分类</el-radio-button>
-          </el-radio-group>
-        </div>
         <el-input placeholder="请输入分类名称" v-model="sortForHttp.sortName">
           <template slot="prepend">分类名称</template>
         </el-input>
-        <el-input placeholder="请输入分类描述" v-model="sortForHttp.sortDescription">
+        <el-input placeholder="请输入分类描述" v-model="sortForHttp.content">
           <template slot="prepend">分类描述</template>
         </el-input>
         <el-input type="number" placeholder="请输入整数，数字小的在前面"
-                  v-model="sortForHttp.priority">
+                  v-model="sortForHttp.sort">
           <template slot="prepend">分类优先级</template>
         </el-input>
       </div>
@@ -97,11 +100,12 @@
                destroy-on-close
                center>
       <div class="my-dialog">
-        <el-input placeholder="请输入标签名称" v-model="labelForHttp.labelName">
+        <el-input placeholder="请输入标签名称" v-model="labelForHttp.content">
           <template slot="prepend">标签名称</template>
         </el-input>
-        <el-input placeholder="请输入标签描述" v-model="labelForHttp.labelDescription">
-          <template slot="prepend">标签描述</template>
+        <el-input type="number" placeholder="请输入整数，数字小的在前面"
+                  v-model="labelForHttp.sort">
+          <template slot="prepend">分类优先级</template>
         </el-input>
       </div>
 
@@ -122,17 +126,16 @@
         sortInfo: [],
         sort: {},
         sortForHttp: {
-          id: null,
+          uid: null,
           sortName: "",
-          sortDescription: "",
-          sortType: null,
-          priority: null
+          content: "",
+          sort: "",
         },
         labelForHttp: {
-          id: null,
-          sortId: null,
-          labelName: "",
-          labelDescription: ""
+          uid: null,
+          blogSortUid: "",
+          content: "",
+          sort: ""
         }
       }
     },
@@ -150,6 +153,10 @@
     },
 
     methods: {
+      changeStatus(blogsort){
+        console.log(blogsort)
+      },
+
       deleteHandle(id, flag) {
         let url;
         if (flag === 1) {
@@ -188,10 +195,9 @@
         });
       },
       saveSortEdit() {
-        if (this.$common.isEmpty(this.sortForHttp.sortType) ||
-          this.$common.isEmpty(this.sortForHttp.priority) ||
+        if (this.$common.isEmpty(this.sortForHttp.sort) ||
           this.$common.isEmpty(this.sortForHttp.sortName) ||
-          this.$common.isEmpty(this.sortForHttp.sortDescription)) {
+          this.$common.isEmpty(this.sortForHttp.content)) {
           this.$message({
             message: "请完善所有分类信息！",
             type: "error"
@@ -200,19 +206,27 @@
         }
 
         let url;
-        if (this.$common.isEmpty(this.sortForHttp.id)) {
-          url = "/webInfo/saveSort";
+        if (this.$common.isEmpty(this.sortForHttp.uid)) {
+          url = "/blogsort/insert";
         } else {
-          url = "/webInfo/updateSort";
+          url = "/blogsort/update";
         }
         this.$http.post(this.$constant.baseURL + url, this.sortForHttp, true)
           .then((res) => {
-            this.$message({
-              message: "保存成功！",
-              type: "success"
-            });
-            this.getSortInfo();
-            this.handleClose();
+            if (res.code === 200){
+              this.$message({
+                message: "保存成功！",
+                type: "success"
+              });
+              this.getSortInfo();
+              this.handleClose();
+            }else {
+              this.$message({
+                message: "保存失败！",
+                type: "error"
+              });
+            }
+
           })
           .catch((error) => {
             this.$message({
@@ -222,8 +236,8 @@
           });
       },
       saveLabelEdit() {
-        if (this.$common.isEmpty(this.labelForHttp.labelName) ||
-          this.$common.isEmpty(this.labelForHttp.labelDescription)) {
+        if (this.$common.isEmpty(this.labelForHttp.content)||
+        this.$common.isEmpty(this.labelForHttp.sort)) {
           this.$message({
             message: "请完善所有标签信息！",
             type: "error"
@@ -232,20 +246,28 @@
         }
 
         let url;
-        if (this.$common.isEmpty(this.labelForHttp.id)) {
-          url = "/webInfo/saveLabel";
+        if (this.$common.isEmpty(this.labelForHttp.uid)) {
+          url = "/tag/insert";
         } else {
-          url = "/webInfo/updateLabel";
+          url = "/tag/update";
         }
         this.$http.post(this.$constant.baseURL + url, this.labelForHttp, true)
           .then((res) => {
-            this.$message({
-              message: "保存成功！",
-              type: "success"
-            });
-            this.getSortInfo();
-            this.handleClose();
-            this.sort = {};
+            if (res.code === 200){
+              this.$message({
+                message: "保存成功！",
+                type: "success"
+              });
+              this.getSortInfo();
+              this.handleClose();
+              this.sort = {};
+            }else {
+              this.$message({
+                message: "保存失败！",
+                type: "error"
+              });
+            }
+
           })
           .catch((error) => {
             this.$message({
@@ -256,36 +278,34 @@
       },
       editSort(sort) {
         this.sortDialog = true;
-        this.sortForHttp.id = sort.id;
+        this.sortForHttp.uid = sort.uid;
         this.sortForHttp.sortName = sort.sortName;
-        this.sortForHttp.sortDescription = sort.sortDescription;
-        this.sortForHttp.sortType = sort.sortType;
-        this.sortForHttp.priority = sort.priority;
+        this.sortForHttp.content = sort.content;
+        this.sortForHttp.sort = sort.sort
       },
       editLabel(label) {
         this.labelDialog = true;
-        this.labelForHttp.id = label.id;
-        this.labelForHttp.sortId = label.sortId;
-        this.labelForHttp.labelName = label.labelName;
-        this.labelForHttp.labelDescription = label.labelDescription;
+        this.labelForHttp.uid = label.uid;
+        this.labelForHttp.blogSortUid = label.blogSortUid;
+        this.labelForHttp.content = label.content;
+        this.labelForHttp.sort = label.sort;
       },
       insertLabel(sort) {
-        this.labelForHttp.sortId = sort.id;
+        this.labelForHttp.blogSortUid = sort.uid;
         this.labelDialog = true;
       },
       handleClose() {
         this.labelForHttp = {
-          id: null,
-          sortId: null,
-          labelName: "",
-          labelDescription: ""
+          uid: null,
+          blogSortUid: null,
+          content: "",
+          sort: ""
         };
         this.sortForHttp = {
-          id: null,
+          uid: null,
           sortName: "",
-          sortDescription: "",
-          sortType: null,
-          priority: null
+          content: "",
+          sort: ""
         };
         this.sortDialog = false;
         this.labelDialog = false;
@@ -294,10 +314,11 @@
         this.sort = sort;
       },
       getSortInfo() {
-        this.$http.get(this.$constant.baseURL + "/webInfo/getSortInfo")
+        this.$http.get(this.$constant.baseURL + "/blogsort/getList")
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.sortInfo = res.data;
+              console.log(this.sortInfo)
             }
           })
           .catch((error) => {
