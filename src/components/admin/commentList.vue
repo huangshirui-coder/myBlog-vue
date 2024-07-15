@@ -1,12 +1,12 @@
 <template>
   <div>
     <div style="margin-bottom: 20px">
-      <el-select v-model="queryComment.blogUid" placeholder="博客" style="margin-right: 10px">
-        <el-option key="1" label="文章评论" value="article"></el-option>
-        <el-option key="2" label="树洞留言" value="message"></el-option>
-        <el-option key="3" label="家庭祝福" value="love"></el-option>
-      </el-select>
-      <el-input class="my-input" type="number" style="width: 140px;margin-right: 10px" v-model="queryComment.author"
+      <el-cascader
+        v-model="blogUidTmp"
+        :options="options"
+        @change="show">
+      </el-cascader>
+      <el-input class="my-input" style="width: 140px;margin-right: 10px" v-model="queryComment.author"
                 placeholder="评论人"></el-input>
       <el-button type="primary" icon="el-icon-search" @click="searchComments()">搜索</el-button>
       <el-button type="danger" @click="clearSearch()">清除参数</el-button>
@@ -47,11 +47,11 @@
           total: 0,
           author: "",
           blogUid: "",
-
         },
+        blogUidTmp: "",
         options: [],
         comments: [],
-        sortArticles: {}
+        sortArticles: null
       }
     },
 
@@ -62,12 +62,16 @@
     created() {
       this.getComments();
       this.handle();
+      console.log(this.options)
     },
 
     mounted() {
     },
 
     methods: {
+      show(){
+        console.log(this.queryComment.blogUid)
+      },
       clearSearch() {
         this.queryComment = {
           pageNum: 1,
@@ -76,12 +80,14 @@
           author: "",
           blogUid: ""
         }
+        this.blogUidTmp = ""
         this.getComments();
       },
       getComments() {
+        this.queryComment.blogUid = this.blogUidTmp[this.blogUidTmp.length - 1]
         this.$http.get(this.$constant.baseURL + "/comment/getListWithSearchParam", this.queryComment, true)
           .then((res) => {
-            if (!this.$common.isEmpty(res.rows)) {
+            if (res.code === 200) {
               this.comments = res.rows;
               this.queryComment.total = res.total;
             }
@@ -109,7 +115,7 @@
           type: 'success',
           center: true
         }).then(() => {
-          this.$http.get(this.$constant.baseURL + "", {id: item.id}, true)
+          this.$http.get(this.$constant.baseURL + "/comment/delete", {uid: item.uid}, true)
             .then((res) => {
               this.queryComment.pageNum = 1;
               this.getComments();
@@ -131,8 +137,8 @@
           });
         });
       },
-      getSortArticles() {
-        this.$http.get(this.$constant.baseURL + "/blog/getSortArticles")
+      async getSortArticles() {
+        await this.$http.get(this.$constant.baseURL + "/blog/getSortArticles")
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.sortArticles = res.data;
@@ -147,28 +153,25 @@
       },
       doexchange(sortArticles){
         var sortInfo = this.$store.state.sortInfo
-        for (var sort in sortInfo){
+        for (const sort of sortInfo) {
           var item = {
             value: "",
             label: "",
-            childen: []
+            children: []
           }
-          var childen = []
           if (sortArticles[sort.uid] != null){
             item.value = sort.uid
             item.label = sort.sortName
-            for (var artcle in sortArticles[sort.uid]){
-              childen.append({value: artcle.uid, label: artcle.title})
+            for (const artcle of sortArticles[sort.uid]){
+              item.children.push({value: artcle.uid, label: artcle.title})
             }
-            item.childen = childen
-            this.options.append(item)
+            this.options.push(item)
           }
         }
       },
-      handle(){
-        this.getSortArticles()
+      async handle(){
+        await this.getSortArticles()
         this.doexchange(this.sortArticles)
-        console.log(this.options)
       }
     }
   }

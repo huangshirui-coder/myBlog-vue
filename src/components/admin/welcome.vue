@@ -40,11 +40,11 @@
             if (res === 400){
               localStorage.setItem("adminToken", "");
               this.$store.commit("loadCurrentAdmin", "");
-              this.$router.push("/verify")
               this.$message({
                 message: "登录信息过期，请重新登录！",
                 type: "error"
               });
+              this.$router.push("/verify")
             }
           }).catch((error)=>{
           this.$message({
