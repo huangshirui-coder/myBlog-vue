@@ -343,10 +343,16 @@
       likeOrCancel(){
         this.like();
 
-        console.log(this.isLike)
       },
 
       like() {
+        if (this.$common.isEmpty(this.$store.state.currentUser)) {
+          this.$message({
+            message: "请先登录！",
+            type: "error"
+          });
+          return;
+        }
         this.$http.get(this.$constant.baseURL + "/blog/updateLikeCount",{uid: this.id, userUid: this.$store.state.currentUser.id, flag: this.isLike})
           .then((res => {
             this.getArticle();
@@ -356,7 +362,6 @@
               type: "error"
             });
           });
-        console.log('点赞!');
         // 在这里添加你的点赞逻辑
       },
       collect() {

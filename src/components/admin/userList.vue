@@ -25,7 +25,7 @@
                     >
               {{scope.row.status === 0 ? '禁用' : '启用'}}
             </el-tag>
-            <el-switch v-if="scope.row.id !== $store.state.currentAdmin.id" @change="changeUserStatus(scope.row)" v-model="scope.row.status" active-value="0" inactive-value="1"></el-switch>
+            <el-switch v-if="scope.row.id !== $store.state.currentAdmin.id" @change="changeUserStatus(scope.row)" v-model="scope.row.status" :active-value="1" :inactive-value="0"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="头像" align="center">
