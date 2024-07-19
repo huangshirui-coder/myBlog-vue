@@ -17,16 +17,16 @@
     </el-tag>
     <el-form :model="article" :rules="rules" ref="ruleForm" label-width="150px"
              class="demo-ruleForm">
-      <el-form-item label="标题" prop="articleTitle">
-        <el-input maxlength="30" v-model="article.articleTitle"></el-input>
+      <el-form-item label="标题" prop="title">
+        <el-input maxlength="30" v-model="article.title"></el-input>
       </el-form-item>
 
       <el-form-item label="视频链接" prop="videoUrl">
         <el-input maxlength="1000" v-model="article.videoUrl"></el-input>
       </el-form-item>
 
-      <el-form-item label="内容" prop="articleContent">
-        <mavon-editor ref="md" @imgAdd="imgAdd" v-model="article.articleContent"/>
+      <el-form-item label="内容" prop="content">
+        <mavon-editor ref="md" @imgAdd="imgAdd" v-model="article.content"/>
       </el-form-item>
 
       <el-form-item label="是否启用评论" prop="commentStatus">
@@ -114,11 +114,10 @@
       return {
         id: this.$route.query.id,
         article: {
-          articleTitle: "",
-          articleContent: "",
-          commentStatus: true,
-          recommendStatus: false,
-          viewStatus: true,
+          title: "",
+          content: "",
+          openComment: true,
+          status: true,
           password: "",
           tips: "",
           articleCover: "",

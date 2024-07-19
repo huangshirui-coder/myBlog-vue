@@ -1,69 +1,48 @@
 <template>
   <div>
     <div class="handle-box">
-      <el-select v-model="pagination.recommendStatus" placeholder="是否推荐" style="width: 120px" class="mrb10">
-        <el-option key="1" label="是" :value="true"></el-option>
-        <el-option key="2" label="否" :value="false"></el-option>
-      </el-select>
-      <el-select style="width: 140px" class="mrb10" v-model="pagination.sortId" placeholder="请选择分类">
+      <el-select style="width: 140px" class="mrb10" v-model="pagination.blogSortUid" placeholder="请选择分类" @change="getTags">
         <el-option
           v-for="item in sorts"
-          :key="item.id"
+          :key="item.uid"
           :label="item.sortName"
-          :value="item.id">
+          :value="item.uid">
         </el-option>
       </el-select>
-      <el-select style="width: 140px" class="mrb10" v-model="pagination.labelId" placeholder="请选择标签">
+      <el-select style="width: 140px" class="mrb10" v-model="pagination.tagUid" placeholder="请选择标签" v-show="pagination.blogSortUid == '' ? false : true">
         <el-option
-          v-for="item in labelsTemp"
-          :key="item.id"
-          :label="item.labelName"
-          :value="item.id">
+          v-for="item in tags"
+          :key="item.uid"
+          :label="item.content"
+          :value="item.uid">
         </el-option>
       </el-select>
-      <el-input v-model="pagination.searchKey" placeholder="文章标题" class="handle-input mrb10"></el-input>
+      <el-input v-model="pagination.title" placeholder="文章标题" class="handle-input mrb10"></el-input>
       <el-button type="primary" icon="el-icon-search" @click="searchArticles()">搜索</el-button>
       <el-button type="danger" @click="clearSearch()">清除参数</el-button>
       <el-button type="primary" @click="$router.push({path: '/postEdit'})">新增文章</el-button>
     </div>
     <el-table :data="articles" border class="table" header-cell-class-name="table-header">
-      <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
-      <el-table-column prop="username" label="作者" align="center"></el-table-column>
-      <el-table-column prop="articleTitle" label="文章标题" align="center"></el-table-column>
-      <el-table-column prop="sort.sortName" label="分类" align="center"></el-table-column>
-      <el-table-column prop="label.labelName" label="标签" align="center"></el-table-column>
-      <el-table-column prop="viewCount" label="浏览量" align="center"></el-table-column>
+      <el-table-column prop="uid" label="uid" width="55" align="center" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="author" label="作者" align="center"></el-table-column>
+      <el-table-column prop="title" label="文章标题" align="center"></el-table-column>
+      <el-table-column prop="blogSort.sortName" label="分类" align="center"></el-table-column>
+      <el-table-column prop="label" label="标签" align="center"></el-table-column>
+      <el-table-column prop="clickCount" label="浏览量" align="center"></el-table-column>
       <el-table-column prop="likeCount" label="点赞数" align="center"></el-table-column>
       <el-table-column label="是否可见" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.viewStatus === false ? 'danger' : 'success'"
-                  disable-transitions>
-            {{scope.row.viewStatus === false ? '不可见' : '可见'}}
-          </el-tag>
-          <el-switch @click.native="changeStatus(scope.row, 1)" v-model="scope.row.viewStatus"></el-switch>
+          <el-switch @click.native="changeStatus(scope.row, 1)" v-model="scope.row.status" :active-value="1" :inactive-value="0"></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="封面" align="center">
         <template slot-scope="scope">
-          <el-image lazy class="table-td-thumb" :src="scope.row.articleCover" fit="cover"></el-image>
+          <el-image lazy class="table-td-thumb" :src="scope.row.coverpic" fit="cover"></el-image>
         </template>
       </el-table-column>
       <el-table-column label="是否启用评论" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.commentStatus === false ? 'danger' : 'success'"
-                  disable-transitions>
-            {{scope.row.commentStatus === false ? '否' : '是'}}
-          </el-tag>
-          <el-switch @click.native="changeStatus(scope.row, 2)" v-model="scope.row.commentStatus"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否推荐" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.recommendStatus === false ? 'danger' : 'success'"
-                  disable-transitions>
-            {{scope.row.recommendStatus === false ? '否' : '是'}}
-          </el-tag>
-          <el-switch @click.native="changeStatus(scope.row, 3)" v-model="scope.row.recommendStatus"></el-switch>
+          <el-switch @click.native="changeStatus(scope.row, 2)" v-model="scope.row.openComment" :active-value="1" :inactive-value="0"></el-switch>
         </template>
       </el-table-column>
       <el-table-column prop="commentCount" label="评论数" align="center"></el-table-column>
@@ -94,19 +73,17 @@
   export default {
     data() {
       return {
-        isBoss: this.$store.state.currentAdmin.isBoss,
         pagination: {
-          current: 1,
-          size: 10,
+          pageNum: 1,
+          pageSize: 10,
           total: 0,
-          searchKey: "",
-          recommendStatus: null,
-          sortId: null,
-          labelId: null
+          blogSortUid: "",
+          tagUid: "",
+          title: ""
         },
         articles: [],
         sorts: [],
-        labels: [],
+        tags: [],
         labelsTemp: []
       }
     },
@@ -124,19 +101,34 @@
 
     created() {
       this.getArticles();
-      this.getSortAndLabel();
+      this.getSort();
+      this.getTags();
     },
 
     mounted() {
     },
 
     methods: {
-      getSortAndLabel() {
-        this.$http.get(this.$constant.baseURL + "/webInfo/listSortAndLabel")
+      getSort() {
+        this.$http.get(this.$constant.baseURL + "/blogsort/getList",null, true)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
-              this.sorts = res.data.sorts;
-              this.labels = res.data.labels;
+              this.sorts = res.data;
+            }
+          })
+          .catch((error) => {
+            this.$message({
+              message: error.message,
+              type: "error"
+            });
+          });
+      },
+      getTags() {
+        this.$http.get(this.$constant.baseURL + "/tag/getListByBlogSortUid", {blogSortUid: this.pagination.blogSortUid}, true)
+          .then((res) => {
+            if (!this.$common.isEmpty(res.data)) {
+              this.tags = res.data;
+              console.log(this.tags)
             }
           })
           .catch((error) => {
@@ -148,28 +140,22 @@
       },
       clearSearch() {
         this.pagination = {
-          current: 1,
-          size: 10,
+          pageNum: 1,
+          pageSize: 10,
           total: 0,
-          searchKey: "",
-          recommendStatus: null,
-          sortId: null,
-          labelId: null
+          blogSortUid: "",
+          tagUid: "",
+          title: ""
         }
+        this.tags = "";
         this.getArticles();
       },
       getArticles() {
-        let url = "";
-        if (this.isBoss) {
-          url = "/admin/article/boss/list";
-        } else {
-          url = "/admin/article/user/list";
-        }
-        this.$http.post(this.$constant.baseURL + url, this.pagination, true)
+        this.$http.get(this.$constant.baseURL + "/blog/getAll", this.pagination, true)
           .then((res) => {
-            if (!this.$common.isEmpty(res.data)) {
-              this.articles = res.data.records;
-              this.pagination.total = res.data.total;
+            if (!this.$common.isEmpty(res.code === 200)) {
+              this.articles = res.rows;
+              this.pagination.total = res.total;
             }
           })
           .catch((error) => {
@@ -192,18 +178,13 @@
         let param;
         if (flag === 1) {
           param = {
-            articleId: article.id,
-            viewStatus: article.viewStatus
+            uid: article.uid,
+            status: article.status
           }
         } else if (flag === 2) {
           param = {
-            articleId: article.id,
-            commentStatus: article.commentStatus
-          }
-        } else if (flag === 3) {
-          param = {
-            articleId: article.id,
-            recommendStatus: article.recommendStatus
+            uid: article.uid,
+            openComment: article.openComment
           }
         }
         this.$http.get(this.$constant.baseURL + "/admin/article/changeArticleStatus", param, true)
@@ -212,7 +193,7 @@
               this.$message({
                 duration: 0,
                 showClose: true,
-                message: "修改成功！注意，文章不可见时必须设置密码才能访问！",
+                message: "修改成功！",
                 type: "warning"
               });
             } else {
