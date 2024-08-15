@@ -5,7 +5,7 @@
                 class="background-image"
                 v-once
                 lazy
-                :src="$store.state.webInfo.randomCover[Math.floor(Math.random() * $store.state.webInfo.randomCover.length)]"
+                :src="$store.state.webInfo.cover"
                 fit="cover">
         <div slot="error" class="image-slot background-image-error"></div>
       </el-image>

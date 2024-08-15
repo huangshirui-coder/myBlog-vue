@@ -103,7 +103,7 @@
         </div>
         <!-- 内容 -->
         <div class="recent-post-desc">
-          {{ article.content }}
+          <div v-html="article.content"></div>
         </div>
         <!-- 分类 标签 -->
         <div class="sort-label">
@@ -144,13 +144,17 @@
 </template>
 
 <script>
+  import article from "@/components/article.vue";
+  import MarkdownIt from "markdown-it";
+
   export default {
     props: {
       articleList: {
         type: Array
       }
     },
-    methods: {}
+    methods: {
+    }
   }
 </script>
 
@@ -199,6 +203,7 @@
   .leftImage {
     position: absolute;
     left: 0;
+    text-align: left;
   }
 
   .rightImage {

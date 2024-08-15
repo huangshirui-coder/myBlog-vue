@@ -25,73 +25,53 @@
         <el-input maxlength="1000" v-model="article.videoUrl"></el-input>
       </el-form-item>
 
+      <el-form-item label="简介" prop="summary">
+        <el-input type="text" maxlength="30" v-model="article.summary"></el-input>
+      </el-form-item>
+
       <el-form-item label="内容" prop="content">
         <mavon-editor ref="md" @imgAdd="imgAdd" v-model="article.content"/>
       </el-form-item>
 
-      <el-form-item label="是否启用评论" prop="commentStatus">
-        <el-tag :type="article.commentStatus === false ? 'danger' : 'success'"
-                disable-transitions>
-          {{article.commentStatus === false ? '否' : '是'}}
-        </el-tag>
-        <el-switch v-model="article.commentStatus"></el-switch>
+      <el-form-item label="是否启用评论" prop="openComment">
+        <el-switch :active-value="1" :inactive-value="0" v-model="article.openComment"></el-switch>
       </el-form-item>
 
-      <el-form-item label="是否推荐" prop="recommendStatus">
-        <el-tag :type="article.recommendStatus === false ? 'danger' : 'success'"
-                disable-transitions>
-          {{article.recommendStatus === false ? '否' : '是'}}
-        </el-tag>
-        <el-switch v-model="article.recommendStatus"></el-switch>
+      <el-form-item label="是否可见" prop="status">
+        <el-switch :active-value="1" :inactive-value="0" v-model="article.status"></el-switch>
       </el-form-item>
 
-      <el-form-item label="是否可见" prop="viewStatus">
-        <el-tag :type="article.viewStatus === false ? 'danger' : 'success'"
-                disable-transitions>
-          {{article.viewStatus === false ? '否' : '是'}}
-        </el-tag>
-        <el-switch v-model="article.viewStatus"></el-switch>
-      </el-form-item>
-
-      <el-form-item v-if="article.viewStatus === false" label="不可见时的访问密码" prop="password">
-        <el-input maxlength="30" v-model="article.password"></el-input>
-      </el-form-item>
-
-      <el-form-item v-if="article.viewStatus === false" label="密码提示" prop="tips">
-        <el-input maxlength="60" v-model="article.tips"></el-input>
-      </el-form-item>
-
-      <el-form-item label="封面" prop="articleCover">
+      <el-form-item label="封面" prop="coverpic">
         <div style="display: flex">
-          <el-input v-model="article.articleCover"></el-input>
+          <el-input v-model="article.coverpic"></el-input>
           <el-image class="table-td-thumb"
                     lazy
                     style="margin-left: 10px"
-                    :preview-src-list="[article.articleCover]"
-                    :src="article.articleCover"
+                    :preview-src-list="[article.coverpic !== '' ? article.coverpic : 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg']"
+                    :src="article.coverpic !== '' ? article.coverpic : 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
                     fit="cover"></el-image>
         </div>
         <uploadPicture :isAdmin="true" :prefix="'articleCover'" style="margin-top: 10px" @addPicture="addArticleCover"
                        :maxSize="2"
                        :maxNumber="1"></uploadPicture>
       </el-form-item>
-      <el-form-item label="分类" prop="sortId">
-        <el-select v-model="article.sortId" placeholder="请选择分类">
+      <el-form-item label="分类" prop="blogSortUid">
+        <el-select v-model="article.blogSortUid" placeholder="请选择分类" @change="getTags">
           <el-option
             v-for="item in sorts"
-            :key="item.id"
+            :key="item.uid"
             :label="item.sortName"
-            :value="item.id">
+            :value="item.uid">
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="标签" prop="labelId">
-        <el-select v-model="article.labelId" placeholder="请选择标签">
+      <el-form-item label="标签" prop="tagUid">
+        <el-select v-model="article.tagUid" multiple placeholder="请选择标签">
           <el-option
-            v-for="item in labelsTemp"
-            :key="item.id"
-            :label="item.labelName"
-            :value="item.id">
+            v-for="item in tags"
+            :key="item.uid"
+            :label="item.content"
+            :value="item.uid">
           </el-option>
         </el-select>
       </el-form-item>
@@ -112,79 +92,128 @@
     },
     data() {
       return {
-        id: this.$route.query.id,
+        item: null,
         article: {
           title: "",
+          summary: "",
           content: "",
-          openComment: true,
-          status: true,
-          password: "",
-          tips: "",
-          articleCover: "",
+          openComment: 1,
+          status: 1,
+          coverpic: "",
           videoUrl: "",
-          sortId: null,
-          labelId: null
+          blogSortUid: null,
+          tagUid: null
         },
         sorts: [],
-        labels: [],
-        labelsTemp: [],
+        tags: [],
+        labelsTemp:[],
         rules: {
-          articleTitle: [
+          title: [
             {required: true, message: '请输入标题', trigger: 'change'}
           ],
-          articleContent: [
+          content: [
             {required: true, message: '请输入内容', trigger: 'change'}
           ],
-          commentStatus: [
+          openComment: [
             {required: true, message: '是否启用评论', trigger: 'change'}
           ],
-          recommendStatus: [
-            {required: true, message: '是否推荐', trigger: 'change'}
-          ],
-          viewStatus: [
+          status: [
             {required: true, message: '是否可见', trigger: 'change'}
           ],
-          articleCover: [
+          coverpic: [
             {required: true, message: '封面', trigger: 'change'}
           ],
-          sortId: [
+          blogSortUid: [
             {required: true, message: '分类', trigger: 'change'}
           ],
-          labelId: [
+          tagUid: [
             {required: true, message: '标签', trigger: 'blur'}
           ]
         }
       }
     },
 
-    computed: {},
+    computed: {
+
+    },
 
     watch: {
-      'article.sortId'(newVal, oldVal) {
+      'article.blogSortUid'(newVal, oldVal) {
         if (oldVal !== null) {
-          this.article.labelId = null;
+          this.article.tagUid = null;
         }
-        if (!this.$common.isEmpty(newVal) && !this.$common.isEmpty(this.labels)) {
-          this.labelsTemp = this.labels.filter(l => l.sortId === newVal);
+      },
+      'article.tagUid'(newVal, oldVal){
+        if (newVal !== null){
         }
       }
     },
 
     created() {
-      this.getSortAndLabel();
+      this.setValue();
+      this.getSort();
     },
 
     mounted() {
-
+      this.getBlog();
+      this.getTags();
+      this.getSort();
     },
 
     methods: {
+      setValue(){
+        try {
+          // 确保 this.$route.query.item 是一个字符串并且不为空
+          if (this.$route.query.item && typeof this.$route.query.item === 'string') {
+            this.item = JSON.parse(this.$route.query.item);
+          }
+        } catch (error) {
+          // 如果解析失败，你可以记录错误，并保持 item 的默认值（这里是 null）
+          console.error('Failed to parse item:', error);
+        }
+      },
+      getBlog(){
+        if (this.item !== undefined && this.item !== "" && this.item !== null){
+          this.article = this.item;
+          this.article.tagUid = (this.article.tagUid || "").toString().split(",");
+        }
+      },
+      getSort() {
+        this.$http.get(this.$constant.baseURL + "/blogsort/getList",null, true)
+          .then((res) => {
+            if (!this.$common.isEmpty(res.data)) {
+              this.sorts = res.data;
+            }
+          })
+          .catch((error) => {
+            this.$message({
+              message: error.message,
+              type: "error"
+            });
+          });
+      },
+      getTags() {
+        if (this.article.blogSortUid !== "" && this.article.blogSortUid !== null){
+          this.$http.get(this.$constant.baseURL + "/tag/getListByBlogSortUid", {blogSortUid: this.article.blogSortUid}, true)
+            .then((res) => {
+              if (!this.$common.isEmpty(res.data)) {
+                this.tags = res.data;
+              }
+            })
+            .catch((error) => {
+              this.$message({
+                message: error.message,
+                type: "error"
+              });
+            });
+        }
+      },
       imgAdd(pos, file) {
         let suffix = "";
         if (file.name.lastIndexOf('.') !== -1) {
           suffix = file.name.substring(file.name.lastIndexOf('.'));
         }
-        let key = "articlePicture" + "/" + this.$store.state.currentAdmin.username.replace(/[^a-zA-Z]/g, '') + this.$store.state.currentAdmin.id + new Date().getTime() + Math.floor(Math.random() * 1000) + suffix;
+        let key = "articlePicture" + "/" + this.$store.state.currentAdmin.id.replace(/[^a-zA-Z]/g, '') + new Date().getTime() + Math.floor(Math.random() * 1000) + suffix;
 
         let storeType = localStorage.getItem("defaultStoreType");
 
@@ -195,12 +224,8 @@
         fd.append("relativePath", key);
         fd.append("type", "articlePicture");
         fd.append("storeType", storeType);
+        this.saveLocal(pos, fd);
 
-        if (storeType === "local") {
-          this.saveLocal(pos, fd);
-        } else if (storeType === "qiniu") {
-          this.saveQiniu(pos, fd);
-        }
       },
       saveLocal(pos, fd) {
         this.$http.upload(this.$constant.baseURL + "/resource/upload", fd, true)
@@ -217,62 +242,17 @@
             });
           });
       },
-      saveQiniu(pos, fd) {
-        this.$http.get(this.$constant.baseURL + "/qiniu/getUpToken", {key: fd.get("key")}, true)
-          .then((res) => {
-            if (!this.$common.isEmpty(res.data)) {
-              fd.append("token", res.data);
 
-              this.$http.uploadQiniu(this.$store.state.sysConfig.qiniuUrl, fd)
-                .then((res) => {
-                  if (!this.$common.isEmpty(res.key)) {
-                    let url = this.$store.state.sysConfig['qiniu.downloadUrl'] + res.key;
-                    let file = fd.get("file");
-                    this.$common.saveResource(this, "articlePicture", url, file.size, file.type, file.name, "qiniu", true);
-                    this.$refs.md.$img2Url(pos, url);
-                  }
-                })
-                .catch((error) => {
-                  this.$message({
-                    message: error.message,
-                    type: "error"
-                  });
-                });
-            }
-          })
-          .catch((error) => {
-            this.$message({
-              message: error.message,
-              type: "error"
-            });
-          });
-      },
       addArticleCover(res) {
-        this.article.articleCover = res;
-      },
-      getSortAndLabel() {
-        this.$http.get(this.$constant.baseURL + "/webInfo/listSortAndLabel")
-          .then((res) => {
-            if (!this.$common.isEmpty(res.data)) {
-              this.sorts = res.data.sorts;
-              this.labels = res.data.labels;
-              if (!this.$common.isEmpty(this.id)) {
-                this.getArticle();
-              }
-            }
-          })
-          .catch((error) => {
-            this.$message({
-              message: error.message,
-              type: "error"
-            });
-          });
+        this.article.coverpic = res;
       },
       getArticle() {
-        this.$http.get(this.$constant.baseURL + "/admin/article/getArticleById", {id: this.id}, true)
+        this.$http.get(this.$constant.baseURL + "/blog/selectOneByUid", {uid: this.item.uid}, true)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.article = res.data;
+              this.article.tagUid = (this.article.tagUid || "").toString().split(",");
+              console.log("getAt:", this.article.tagUid)
             }
           })
           .catch((error) => {
@@ -283,20 +263,14 @@
           });
       },
       submitForm(formName) {
-        if (this.article.viewStatus === false && this.$common.isEmpty(this.article.password)) {
-          this.$message({
-            message: "文章不可见时必须输入密码！",
-            type: "error"
-          });
-          return;
-        }
         this.$refs[formName].validate((valid) => {
           if (valid) {
+            this.article.tagUid = this.article.tagUid.join(",");
             if (this.$common.isEmpty(this.id)) {
-              this.saveArticle(this.article, "/article/saveArticle")
+              this.saveArticle(this.article, "/blog/insertOne")
             } else {
-              this.article.id = this.id;
-              this.saveArticle(this.article, "/article/updateArticle")
+              this.article.uid = this.id;
+              this.saveArticle(this.article, "/blog/updateOne")
             }
           } else {
             this.$message({
@@ -308,7 +282,7 @@
       },
       resetForm(formName) {
         this.$refs[formName].resetFields();
-        if (!this.$common.isEmpty(this.id)) {
+        if (!this.$common.isEmpty(this.item)) {
           this.getArticle();
         }
       },

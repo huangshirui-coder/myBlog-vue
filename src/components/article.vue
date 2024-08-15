@@ -7,7 +7,7 @@
         <el-image class="article-image my-el-image"
                   v-once
                   lazy
-                  :src="'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
+                  :src="$common.isEmpty(article.coverpic) ? 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' : article.coverpic"
                   fit="cover">
           <div slot="error" class="image-slot">
             <div class="article-image"></div>
@@ -176,7 +176,7 @@
                class="article-copy"
                center>
       <div style="display: flex;align-items: center;flex-direction: column">
-        <el-avatar shape="square" :size="35" :src="$store.state.webInfo.avatar"></el-avatar>
+        <el-avatar shape="square" :size="35" :src="$store.state.webInfo.webHead"></el-avatar>
         <div class="copyright-container">
           <p>
             {{ $store.state.webInfo.webName }}是指运行在{{ $constant.host }}域名及相关子域名上的网站，本条款描述了{{ $store.state.webInfo.webName }}的网站版权声明：
@@ -453,9 +453,9 @@
               this.article = res.data;
               this.isRecord = res.data.record;
               this.isLike = res.data.like;
-              // const md = new MarkdownIt({breaks: true}).use(require('markdown-it-multimd-table'));
-              // this.articleContentHtml = md.render(this.article.content);
-              this.articleContentHtml = this.article.content
+              const md = new MarkdownIt({breaks: true}).use(require('markdown-it-multimd-table'));
+              this.articleContentHtml = md.render(this.article.content);
+              // this.articleContentHtml = this.article.content
               this.$nextTick(() => {
                 this.$common.imgShow(".entry-content img");
                 this.highlight();

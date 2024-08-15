@@ -5,7 +5,7 @@
       ref="upload"
       multiple
       drag
-      :action="$store.state.sysConfig.qiniuUrl"
+      :action="this.$constant.baseURL + '/resource/upload'"
       :on-change="handleChange"
       :before-upload="beforeUpload"
       :on-success="handleSuccess"
@@ -67,7 +67,7 @@
       },
       storeType: {
         type: String,
-        default: localStorage.getItem("defaultStoreType")
+        default: "local"
       },
       accept: {
         type: String,
@@ -109,56 +109,19 @@
           suffix = options.file.name.substring(options.file.name.lastIndexOf('.'));
         }
 
-        let key = this.prefix + "/" + (!this.$common.isEmpty(this.$store.state.currentUser.username) ? (this.$store.state.currentUser.username.replace(/[^a-zA-Z]/g, '') + this.$store.state.currentUser.id) : (this.$store.state.currentAdmin.username.replace(/[^a-zA-Z]/g, '') + this.$store.state.currentAdmin.id)) + new Date().getTime() + Math.floor(Math.random() * 1000) + suffix;
+        let key = this.prefix + "/" + this.$store.state.currentUser.id + new Date().getTime() + Math.floor(Math.random() * 1000) + suffix;
 
-        if (this.storeType === "local") {
-          let fd = new FormData();
-          fd.append("file", options.file);
-          fd.append("originalName", options.file.name);
-          fd.append("key", key);
-          fd.append("relativePath", key);
-          fd.append("type", this.prefix);
-          fd.append("storeType", this.storeType);
+        let fd = new FormData();
+        fd.append("file", options.file);
 
-          return this.$http.upload(this.$constant.baseURL + "/resource/upload", fd, this.isAdmin, options);
-        } else if (this.storeType === "qiniu") {
-          const xhr = new XMLHttpRequest();
-          xhr.open('get', this.$constant.baseURL + "/qiniu/getUpToken?key=" + key, false);
-          if (this.isAdmin) {
-            xhr.setRequestHeader("Authorization", localStorage.getItem("adminToken"));
-          } else {
-            xhr.setRequestHeader("Authorization", localStorage.getItem("userToken"));
-          }
-
-          try {
-            xhr.send();
-            const res = JSON.parse(xhr.responseText);
-            if (res !== null && res.hasOwnProperty("code") && res.code === 200) {
-              options.data = {
-                token: res.data,
-                key: key
-              };
-              return upload(options);
-            } else if (res !== null && res.hasOwnProperty("code") && res.code !== 200) {
-              return Promise.reject(res.message);
-            } else {
-              return Promise.reject("服务异常！");
-            }
-          } catch (e) {
-            return Promise.reject(e.message);
-          }
-        }
+        return this.$http.upload(this.$constant.baseURL + "/resource/upload", fd, this.isAdmin, options);
       },
 
       // 文件上传成功时的钩子
       handleSuccess(response, file, fileList) {
         let url;
-        if (this.storeType === "local") {
-          url = response.data;
-        } else if (this.storeType === "qiniu") {
-          url = this.$store.state.sysConfig['qiniu.downloadUrl'] + response.key;
-          this.$common.saveResource(this, this.prefix, url, file.size, file.raw.type, file.name, "qiniu", this.isAdmin);
-        }
+        url = response.data;
+
         this.$emit("addPicture", url);
       },
       handleError(err, file, fileList) {

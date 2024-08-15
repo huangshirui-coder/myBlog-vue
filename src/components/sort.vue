@@ -33,6 +33,8 @@
 </template>
 
 <script>
+  import MarkdownIt from "markdown-it";
+
   const twoPoem = () => import("./common/twoPoem.vue");
   const proTag = () => import( "./common/proTag");
   const articleList = () => import( "./articleList");
@@ -116,6 +118,10 @@
           })
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
+              res.data.blogList.forEach(item => {
+                const md = new MarkdownIt({breaks: true}).use(require('markdown-it-multimd-table'));
+                item.content = md.render(item.content);
+              })
               this.articles = this.articles.concat(res.data.blogList);
               this.pagination.total = res.data.total;
             }

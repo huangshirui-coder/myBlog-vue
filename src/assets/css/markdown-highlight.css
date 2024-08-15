@@ -1,6 +1,7 @@
 /* markdown样式 */
 .entry-content {
     position: relative;
+    text-align: left;
 }
 
 .entry-content blockquote {
@@ -8,7 +9,7 @@
     padding: 15px 50px;
     position: relative;
     word-break: break-word;
-    text-align: center;
+    text-align: left;
 }
 
 .entry-content blockquote:before {

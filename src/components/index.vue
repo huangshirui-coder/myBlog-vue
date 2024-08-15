@@ -14,7 +14,7 @@
                   class="background-image-index"
                   v-once
                   lazy
-                  :src="!$common.isEmpty($store.state.webInfo.backgroundImage)?$store.state.webInfo.backgroundImage:'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
+                  :src="!$common.isEmpty($store.state.webInfo.cover)?$store.state.webInfo.cover:'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
                   fit="cover">
           <div slot="error" class="image-slot background-image-index-error"></div>
         </el-image>
@@ -153,6 +153,8 @@
   </div>
 </template>
 <script>
+  import MarkdownIt from "markdown-it";
+
   const loader = () => import( "./common/loader");
   const zombie = () => import( "./common/zombie");
   const articleList = () => import( "./articleList");
@@ -268,6 +270,12 @@
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.sortArticles = res.data;
+              Object.keys(this.sortArticles).forEach(key => {
+                this.sortArticles[key].forEach(item => {
+                  const md = new MarkdownIt({breaks: true}).use(require('markdown-it-multimd-table'));
+                    item.content = md.render(item.content);
+                })
+              })
             }
           })
           .catch((error) => {

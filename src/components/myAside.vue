@@ -3,7 +3,7 @@
     <div class="myAside-container">
       <!-- 网站信息 -->
       <div v-if="!$common.mobile()" class="card-content1 shadow-box background-opacity">
-        <el-avatar style="margin-top: 20px" class="user-avatar" :size="120" :src="'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"></el-avatar>
+        <el-avatar style="margin-top: 20px" class="user-avatar" :size="120" :src="$common.isEmpty($store.state.webInfo.webHead) ? 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png' : $store.state.webInfo.webHead"></el-avatar>
         <div class="web-name">{{ $store.state.webInfo.webName }}</div>
         <div class="web-info">
           <div class="blog-info-box">

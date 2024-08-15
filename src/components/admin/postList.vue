@@ -27,12 +27,18 @@
       <el-table-column prop="author" label="作者" align="center"></el-table-column>
       <el-table-column prop="title" label="文章标题" align="center"></el-table-column>
       <el-table-column prop="blogSort.sortName" label="分类" align="center"></el-table-column>
-      <el-table-column prop="label" label="标签" align="center"></el-table-column>
+      <el-table-column prop="label" label="标签" align="center">
+        <template v-slot:default="scope">
+          <el-tag v-for="item in scope.row.tagList" :key="item.uid">
+            {{item.content}}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="clickCount" label="浏览量" align="center"></el-table-column>
       <el-table-column prop="likeCount" label="点赞数" align="center"></el-table-column>
       <el-table-column label="是否可见" align="center">
         <template slot-scope="scope">
-          <el-switch @click.native="changeStatus(scope.row, 1)" v-model="scope.row.status" :active-value="1" :inactive-value="0"></el-switch>
+          <el-switch @click.native="changeStatus(scope.row)" v-model="scope.row.status" :active-value="1" :inactive-value="0"></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="封面" align="center">
@@ -42,13 +48,13 @@
       </el-table-column>
       <el-table-column label="是否启用评论" align="center">
         <template slot-scope="scope">
-          <el-switch @click.native="changeStatus(scope.row, 2)" v-model="scope.row.openComment" :active-value="1" :inactive-value="0"></el-switch>
+          <el-switch @click.native="changeOpenComment(scope.row)" v-model="scope.row.openComment" :active-value="1" :inactive-value="0"></el-switch>
         </template>
       </el-table-column>
       <el-table-column prop="commentCount" label="评论数" align="center"></el-table-column>
       <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
       <el-table-column prop="updateTime" label="最终修改时间" align="center"></el-table-column>
-      <el-table-column label="操作" width="180" align="center">
+      <el-table-column label="操作" width="180" align="center" fixed="right">
         <template slot-scope="scope">
           <el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-button>
           <el-button type="text" icon="el-icon-delete" style="color: var(--orangeRed)" @click="handleDelete(scope.row)">
@@ -174,34 +180,38 @@
         this.pagination.current = 1;
         this.getArticles();
       },
-      changeStatus(article, flag) {
+      changeOpenComment(article){
         let param;
-        if (flag === 1) {
-          param = {
-            uid: article.uid,
-            status: article.status
-          }
-        } else if (flag === 2) {
-          param = {
-            uid: article.uid,
-            openComment: article.openComment
-          }
+        param = {
+          uid: article.uid,
+          openComment: article.openComment
         }
-        this.$http.get(this.$constant.baseURL + "/admin/article/changeArticleStatus", param, true)
+        this.$http.get(this.$constant.baseURL + "/blog/changeOpenComment", param, true)
           .then((res) => {
-            if (flag === 1) {
-              this.$message({
-                duration: 0,
-                showClose: true,
-                message: "修改成功！",
-                type: "warning"
-              });
-            } else {
+            this.$message({
+              message: "修改成功！",
+              type: "success"
+            });
+          })
+          .catch((error) => {
+            this.$message({
+              message: error.message,
+              type: "error"
+            });
+          });
+      },
+      changeStatus(article) {
+        let param;
+        param = {
+          uid: article.uid,
+          status: article.status
+        }
+        this.$http.get(this.$constant.baseURL + "/blog/changeStatus", param, true)
+          .then((res) => {
               this.$message({
                 message: "修改成功！",
                 type: "success"
               });
-            }
           })
           .catch((error) => {
             this.$message({
@@ -217,7 +227,7 @@
           type: 'success',
           center: true
         }).then(() => {
-          this.$http.get(this.$constant.baseURL + "/article/deleteArticle", {id: item.id}, true)
+          this.$http.get(this.$constant.baseURL + "/blog/deleteByUid", {uid: item.uid}, true)
             .then((res) => {
               this.pagination.current = 1;
               this.getArticles();
@@ -240,7 +250,7 @@
         });
       },
       handleEdit(item) {
-        this.$router.push({path: '/postEdit', query: {id: item.id}});
+        this.$router.push({path: '/postEdit', query: {item: JSON.stringify(item)}});
       }
     }
   }

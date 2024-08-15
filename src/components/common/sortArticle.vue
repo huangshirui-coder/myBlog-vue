@@ -101,7 +101,7 @@
         </div>
         <!-- 内容 -->
         <div class="recent-post-desc">
-          {{ article.content }}
+          <div v-html="article.content"></div>
         </div>
         <!-- 分类 标签 -->
         <div class="sort-label">
