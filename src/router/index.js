@@ -88,6 +88,10 @@ const routes = [
       path: '/commentList',
       name: 'commentList',
       component: () => import('../components/admin/commentList')
+    }, {
+      path: '/blackIp',
+      name: 'blackIp',
+      component: () => import('../components/admin/blackIp')
     }]
   },
   {

@@ -65,8 +65,8 @@
     </el-table>
     <div class="pagination">
       <el-pagination background layout="total, prev, pager, next"
-                     :current-page="pagination.current"
-                     :page-size="pagination.size"
+                     :current-page="pagination.pageNum"
+                     :page-size="pagination.pageSize"
                      :total="pagination.total"
                      @current-change="handlePageChange">
       </el-pagination>
@@ -172,12 +172,12 @@
           });
       },
       handlePageChange(val) {
-        this.pagination.current = val;
+        this.pagination.pageNum = val;
         this.getArticles();
       },
       searchArticles() {
         this.pagination.total = 0;
-        this.pagination.current = 1;
+        this.pagination.pageNum = 1;
         this.getArticles();
       },
       changeOpenComment(article){

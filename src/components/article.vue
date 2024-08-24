@@ -96,6 +96,11 @@
                 fill="#885F44"></path>
             </svg>
             <span>&nbsp;{{ article.likeCount }}</span>
+            <span>·</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="yellow" style="stroke-linejoin:round;"/>
+            </svg>
+            <span>&nbsp;{{ article.collectCount }}</span>
           </div>
         </div>
 
@@ -161,12 +166,6 @@
       <div style="background: var(--background)">
         <myFooter></myFooter>
       </div>
-    </div>
-
-
-
-    <div id="toc-button" @click="clickTocButton()">
-      <i class="fa fa-align-justify" aria-hidden="true"></i>
     </div>
 
     <el-dialog title="版权声明"
@@ -262,6 +261,7 @@
       };
     },
     created() {
+      this.updateClickCount();
       if (!this.$common.isEmpty(this.id)) {
         this.getArticle();
 
@@ -293,52 +293,10 @@
       // },
     },
     methods: {
-      clickTocButton() {
-        let display = $(".toc");
-        if ("none" === display.css("display")) {
-          display.css("display", "unset");
-        } else {
-          display.css("display", "none");
-        }
+      updateClickCount(){
+        this.$http.get(this.$constant.baseURL + "/blog/updateClickCount", {uid: this.id})
+        this.getArticle()
       },
-      subscribeLabel() {
-        if (this.$common.isEmpty(this.$store.state.currentUser)) {
-          this.$message({
-            message: "请先登录！",
-            type: "error"
-          });
-          return;
-        }
-
-        this.$confirm('确认' + (this.subscribe ? '取消订阅' : '订阅') + '专栏【' + this.article.blogSort.sortName + '】？' + (this.subscribe ? "" : "订阅专栏后，该专栏发布新文章将通过邮件通知订阅用户。"), this.subscribe ? "取消订阅" : "文章订阅", {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          center: true
-        }).then(() => {
-          this.$http.get(this.$constant.baseURL + "/user/subscribe", {
-            labelId: this.article.labelId,
-            flag: !this.subscribe
-          })
-            .then((res) => {
-              if (!this.$common.isEmpty(res.data)) {
-                this.$store.commit("loadCurrentUser", res.data);
-              }
-              this.subscribe = !this.subscribe;
-            })
-            .catch((error) => {
-              this.$message({
-                message: error.message,
-                type: "error"
-              });
-            });
-        }).catch(() => {
-          this.$message({
-            type: 'success',
-            message: '已取消!'
-          });
-        });
-      },
-
 
       likeOrCancel(){
         this.like();
@@ -365,8 +323,22 @@
         // 在这里添加你的点赞逻辑
       },
       collect() {
-        console.log('收藏!');
-        // 在这里添加你的收藏逻辑
+        if (this.$common.isEmpty(this.$store.state.currentUser)) {
+          this.$message({
+            message: "请先登录！",
+            type: "error"
+          });
+          return;
+        }
+        this.$http.get(this.$constant.baseURL + "/blog/updateRecordCount",{uid: this.id, userUid: this.$store.state.currentUser.id, flag: this.isRecord})
+          .then((res => {
+            this.getArticle();
+          })).catch((error) => {
+          this.$message({
+            message: error.message,
+            type: "error"
+          });
+        });
       },
       share() {
         console.log('转发!');

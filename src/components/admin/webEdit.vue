@@ -55,6 +55,34 @@
                          :maxNumber="1"></uploadPicture>
         </el-form-item>
 
+        <el-form-item label="普通用户登录背景" prop="loginCover">
+          <div style="display: flex">
+            <el-input v-model="webInfo.loginCover"></el-input>
+            <el-image lazy class="table-td-thumb"
+                      style="margin-left: 10px"
+                      :preview-src-list="[webInfo.loginCover]"
+                      :src="webInfo.loginCover"
+                      fit="cover"></el-image>
+          </div>
+          <uploadPicture :isAdmin="true" :prefix="'webAvatar'" style="margin-top: 15px" @addPicture="addAvatar"
+                         :maxSize="5"
+                         :maxNumber="1"></uploadPicture>
+        </el-form-item>
+
+        <el-form-item label="管理员登录用户背景" prop="adminLoginCover">
+          <div style="display: flex">
+            <el-input v-model="webInfo.adminLoginCover"></el-input>
+            <el-image lazy class="table-td-thumb"
+                      style="margin-left: 10px"
+                      :preview-src-list="[webInfo.adminLoginCover]"
+                      :src="webInfo.adminLoginCover"
+                      fit="cover"></el-image>
+          </div>
+          <uploadPicture :isAdmin="true" :prefix="'webAvatar'" style="margin-top: 15px" @addPicture="addAvatar"
+                         :maxSize="5"
+                         :maxNumber="1"></uploadPicture>
+        </el-form-item>
+
         <el-form-item label="提示" prop="webNotices">
           <div style="display: flex">
             <el-input :disabled="disabled" :rows="6" type="textarea" v-model="webInfo.webNotices"></el-input>
@@ -99,7 +127,9 @@
           cover: "",
           webHead: "",
           webNotices: "",
-          webWelcome: ""
+          webWelcome: "",
+          loginCover: '',
+          adminLoginCover: ''
         },
         notices: [],
         rules: {

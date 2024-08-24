@@ -72,7 +72,7 @@
               <el-dropdown placement="bottom">
                 <el-avatar class="user-avatar" :size="36"
                            style="margin-top: 12px"
-                           :src="!$common.isEmpty($store.state.currentUser) ? $store.state.currentUser.avatar : 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'">
+                           :src="!$common.isEmpty($store.state.currentUser.avatar) ? $store.state.currentUser.avatar : 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'">
                 </el-avatar>
 
                 <el-dropdown-menu slot="dropdown">

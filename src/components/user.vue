@@ -73,15 +73,14 @@
               <div>手机号：</div>
               <div>邮箱：</div>
               <div>性别：</div>
-              <div>简介：</div>
             </div>
             <div class="user-content">
               <div>
-                <el-input maxlength="30" v-model="currentUser"></el-input>
+                <el-input maxlength="30" v-model="currentUser.userName"></el-input>
               </div>
               <div>
-                <div v-if="!$common.isEmpty(currentUser.phoneNumber)">
-                  {{ currentUser.phoneNumber }} <span class="changeInfo" @click="changeDialog('修改手机号')">修改（功能未接入）</span>
+                <div v-if="!$common.isEmpty(currentUser.phonenumber)">
+                  {{ currentUser.phonenumber }} <span class="changeInfo" @click="changeDialog('修改手机号')">修改（功能未接入）</span>
                 </div>
                 <div v-else><span class="changeInfo" @click="changeDialog('绑定手机号')">绑定手机号（功能未接入）</span></div>
               </div>
@@ -92,17 +91,11 @@
                 <div v-else><span class="changeInfo" @click="changeDialog('绑定邮箱')">绑定邮箱</span></div>
               </div>
               <div>
-                <el-radio-group v-model="currentUser.gender">
-                  <el-radio :label="0" style="margin-right: 10px">薛定谔的猫</el-radio>
-                  <el-radio :label="1" style="margin-right: 10px">男</el-radio>
-                  <el-radio :label="2">女</el-radio>
+                <el-radio-group v-model="currentUser.sex">
+                  <el-radio :label="0" style="margin-right: 10px">男</el-radio>
+                  <el-radio :label="1">女</el-radio>
+                  <el-radio :label="2" style="margin-right: 10px">薛定谔的猫</el-radio>
                 </el-radio-group>
-              </div>
-              <div>
-                <el-input v-model="currentUser.introduction"
-                          maxlength="60"
-                          type="textarea"
-                          show-word-limit></el-input>
               </div>
             </div>
           </div>
@@ -135,16 +128,12 @@
             <el-input v-model="phoneNumber"></el-input>
             <div style="margin-top: 10px;margin-bottom: 5px">验证码：</div>
             <el-input v-model="code"></el-input>
-            <div style="margin-top: 10px;margin-bottom: 5px">密码：</div>
-            <el-input v-model="password"></el-input>
           </div>
           <div v-else-if="dialogTitle === '修改邮箱' || dialogTitle === '绑定邮箱'">
             <div style="margin-bottom: 5px">邮箱：</div>
             <el-input v-model="email"></el-input>
             <div style="margin-top: 10px;margin-bottom: 5px">验证码：</div>
             <el-input v-model="code"></el-input>
-            <div style="margin-top: 10px;margin-bottom: 5px">密码：</div>
-            <el-input v-model="password"></el-input>
           </div>
           <div v-else-if="dialogTitle === '修改头像'">
             <uploadPicture :prefix="'userAvatar'" @addPicture="addPicture" :maxSize="1"
@@ -213,7 +202,7 @@
     },
     data() {
       return {
-        currentUser: this.$store.state.currentUser.userName,
+        currentUser: this.$store.state.currentUser,
         userName: "",
         password: "",
         phoneNumber: "",
@@ -341,13 +330,11 @@
         }
 
         let user = {
-          userName: this.currentUser,
-          gender: this.currentUser.gender
+          id: this.currentUser.id,
+          userName: this.currentUser.userName,
+          sex: this.currentUser.sex,
+          email: this.currentUser.email
         };
-
-        if (!this.$common.isEmpty(this.currentUser.introduction)) {
-          user.introduction = this.currentUser.introduction.trim();
-        }
 
         this.$confirm('确认保存？', '提示', {
           confirmButtonText: '确定',
@@ -355,11 +342,11 @@
           type: 'success',
           center: true
         }).then(() => {
-          this.$http.post(this.$constant.baseURL + "/user/updateUserInfo", user)
+          this.$http.post(this.$constant.baseURL + "/user/update", user)
             .then((res) => {
               if (!this.$common.isEmpty(res.data)) {
                 this.$store.commit("loadCurrentUser", res.data);
-                this.currentUser = this.$store.state.currentUser.userName;
+                this.currentUser = this.$store.state.currentUser;
                 this.$message({
                   message: "修改成功！",
                   type: "success"
@@ -426,7 +413,7 @@
           return false;
         }
 
-        if (this.currentUser.indexOf(" ") !== -1) {
+        if (this.currentUser.userName.indexOf(" ") !== -1) {
           this.$message({
             message: "用户名不能包含空格！",
             type: "error"
@@ -452,10 +439,13 @@
             return false;
           }
         }
-
+        if (value === "修改邮箱"){
+          this.email = this.currentUser.email
+        }
         this.dialogTitle = value;
         this.showDialog = true;
       },
+
       submitDialog() {
         if (this.dialogTitle === "修改头像") {
           if (this.$common.isEmpty(this.avatar)) {
@@ -465,10 +455,11 @@
             });
           } else {
             let user = {
-              avatar: this.avatar.trim()
+              id: this.currentUser.id,
+              avatar: this.avatar.trim(),
+              email: this.currentUser.email
             };
-
-            this.$http.post(this.$constant.baseURL + "/user/updateUserInfo", user)
+            this.$http.post(this.$constant.baseURL + "/user/update", user)
               .then((res) => {
                 if (!this.$common.isEmpty(res.data)) {
                   this.$store.commit("loadCurrentUser", res.data);
@@ -510,57 +501,97 @@
           });
           return;
         }
-        if (this.$common.isEmpty(this.password)) {
-          this.$message({
-            message: "请输入密码！",
-            type: "error"
-          });
-          return;
-        }
         let params = {
-          code: this.code.trim(),
-          password: this.$common.encrypt(this.password.trim())
+          id: this.currentUser.id,
+          email: this.email
         };
         if (!this.checkParams(params)) {
           return;
         }
-
-        if (this.dialogTitle === "找回密码") {
-          this.$http.post(this.$constant.baseURL + "/user/updateForForgetPassword", params, false, false)
-            .then((res) => {
-              this.clearDialog();
-              this.$message({
-                message: "修改成功，请重新登陆！",
-                type: "success"
-              });
-            })
-            .catch((error) => {
-              this.$message({
-                message: error.message,
-                type: "error"
-              });
-            });
-        } else {
-          this.$http.post(this.$constant.baseURL + "/user/updateSecretInfo", params, false, false)
-            .then((res) => {
-              if (!this.$common.isEmpty(res.data)) {
-                this.$store.commit("loadCurrentUser", res.data);
-                this.currentUser = this.$store.state.currentUser.userName;
-                this.clearDialog();
+        if (this.dialogTitle === "修改邮箱"){
+          params.email = null
+        }
+        this.$http.post(this.$constant.baseURL + "/user/update", params)
+          .then((res) => {
+            if (!this.$common.isEmpty(res.data)) {
+              this.$store.commit("loadCurrentUser", res.data);
+              this.currentUser = this.$store.state.currentUser;
+              if (this.dialogTitle === "修改邮箱"){
                 this.$message({
-                  message: "修改成功！",
+                  message: "邮箱已重置，可重新绑定。",
                   type: "success"
                 });
               }
-            })
-            .catch((error) => {
-              this.$message({
-                message: error.message,
-                type: "error"
-              });
+              if (this.dialogTitle === "绑定邮箱"){
+                this.$message({
+                  message: "邮箱已成功绑定。",
+                  type: "success"
+                });
+              }
+              this.clearDialog();
+            }
+          })
+          .catch((error) => {
+            this.$message({
+              message: error.message,
+              type: "error"
             });
-        }
+          });
+
       },
+      // updateSecretInfo() {
+      //   if (this.$common.isEmpty(this.code)) {
+      //     this.$message({
+      //       message: "请输入验证码！",
+      //       type: "error"
+      //     });
+      //     return;
+      //   }
+      //   let params = {
+      //     verCode: this.code.trim(),
+      //     password: this.password.trim()
+      //
+      //   };
+      //   if (!this.checkParams(params)) {
+      //     return;
+      //   }
+      //
+      //   if (this.dialogTitle === "找回密码") {
+      //     this.$http.post(this.$constant.baseURL + "/user/updateForForgetPassword", params, false, false)
+      //       .then((res) => {
+      //         this.clearDialog();
+      //         this.$message({
+      //           message: "修改成功，请重新登陆！",
+      //           type: "success"
+      //         });
+      //       })
+      //       .catch((error) => {
+      //         this.$message({
+      //           message: error.message,
+      //           type: "error"
+      //         });
+      //       });
+      //   } else {
+      //     this.$http.post(this.$constant.baseURL + "/user/updateSecretInfo", params, false, false)
+      //       .then((res) => {
+      //         if (!this.$common.isEmpty(res.data)) {
+      //           this.$store.commit("loadCurrentUser", res.data);
+      //           this.currentUser = this.$store.state.currentUser.userName;
+      //           this.clearDialog();
+      //           this.$message({
+      //             message: "修改成功！",
+      //             type: "success"
+      //           });
+      //         }
+      //       })
+      //       .catch((error) => {
+      //         this.$message({
+      //           message: error.message,
+      //           type: "error"
+      //         });
+      //       });
+      //   }
+      // },
       getCode() {
         if (this.codeString === "验证码") {
           // 获取验证码
@@ -570,7 +601,7 @@
           }
 
           let url;
-          if (this.dialogTitle === "找回密码" || this.dialogTitle === "邮箱验证码") {
+          if (this.dialogTitle === "找回密码" || this.dialogTitle === "邮箱验证码" || this.dialogTitle === "绑定邮箱" || this.dialogTitle === "修改邮箱") {
             url = "/email/sendVerMail";
           } else {
             url = "/user/getCodeForBind";

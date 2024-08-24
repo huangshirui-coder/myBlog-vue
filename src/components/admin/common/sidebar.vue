@@ -77,6 +77,10 @@
           icon: "el-icon-edit-outline",
           index: "/commentList",
           title: "评论管理"
+        }, {
+          icon: "el-icon-edit-outline",
+          index: "/blackIp",
+          title: "黑名单管理"
         }]
       }
     },
