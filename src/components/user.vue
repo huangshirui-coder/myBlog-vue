@@ -8,7 +8,7 @@
                 style="position: absolute"
                 v-once
                 lazy
-                :src="'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
+                :src="$common.isEmpty(this.$store.state.webInfo.loginCover) ? 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' : this.$store.state.webInfo.loginCover"
                 fit="cover">
         <div slot="error" class="image-slot"></div>
       </el-image>
@@ -463,7 +463,7 @@
               .then((res) => {
                 if (!this.$common.isEmpty(res.data)) {
                   this.$store.commit("loadCurrentUser", res.data);
-                  this.currentUser = this.$store.state.currentUser.userName;
+                  this.currentUser = this.$store.state.currentUser;
                   this.clearDialog();
                   this.$message({
                     message: "修改成功！",

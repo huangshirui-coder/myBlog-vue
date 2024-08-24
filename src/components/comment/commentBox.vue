@@ -70,7 +70,7 @@
       },
 
       submitComment() {
-        if (this.$common.isEmpty(this.$store.state.currentUser) && false) {
+        if (this.$common.isEmpty(this.$store.state.currentUser)) {
           this.$message({
             message: "请先登录！",
             type: "error"

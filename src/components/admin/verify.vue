@@ -1,6 +1,15 @@
 <template>
   <div class="myCenter verify-container">
     <div class="verify-content">
+      <!-- 背景图片 -->
+      <el-image class="my-el-image"
+                style="position: absolute"
+                v-once
+                lazy
+                :src="$common.isEmpty(this.$store.state.webInfo.adminLoginCover) ? 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' : this.$store.state.webInfo.adminLoginCover"
+                fit="cover">
+        <div slot="error" class="image-slot"></div>
+      </el-image>
       <div>
         <el-avatar :size="50" :src="$store.state.webInfo.webHead"></el-avatar>
       </div>

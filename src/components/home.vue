@@ -61,7 +61,7 @@
 
 
             <!-- 后台 -->
-            <li @click="goAdmin()">
+            <li @click="$router.push({path: '/admin'})">
               <div class="my-menu">
                 💻️ <span>后台</span>
               </div>
@@ -369,7 +369,7 @@
       },
 
       getSortInfo() {
-        this.$http.get("http://localhost:8088/blogsort/getList")
+        this.$http.get(this.$constant.baseURL + "/blogsort/getList")
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.$store.commit("loadSortInfo", res.data);

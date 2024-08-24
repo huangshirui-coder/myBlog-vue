@@ -242,7 +242,8 @@
         let comment = {
           blogUid: this.source,
           type: this.type,
-          content: content
+          content: content,
+          author: this.$store.state.currentUser.userName,
         };
 
         this.$http.post(this.$constant.baseURL + "/comment/insert", comment)
