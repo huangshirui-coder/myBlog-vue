@@ -64,7 +64,7 @@
                       :src="webInfo.loginCover"
                       fit="cover"></el-image>
           </div>
-          <uploadPicture :isAdmin="true" :prefix="'webAvatar'" style="margin-top: 15px" @addPicture="addAvatar"
+          <uploadPicture :isAdmin="true" :prefix="'webAvatar'" style="margin-top: 15px" @addPicture="addLoginCover"
                          :maxSize="5"
                          :maxNumber="1"></uploadPicture>
         </el-form-item>
@@ -78,7 +78,7 @@
                       :src="webInfo.adminLoginCover"
                       fit="cover"></el-image>
           </div>
-          <uploadPicture :isAdmin="true" :prefix="'webAvatar'" style="margin-top: 15px" @addPicture="addAvatar"
+          <uploadPicture :isAdmin="true" :prefix="'webAvatar'" style="margin-top: 15px" @addPicture="addAdminLoginCover"
                          :maxSize="5"
                          :maxNumber="1"></uploadPicture>
         </el-form-item>
@@ -175,6 +175,8 @@
       addAvatar(res) {
         this.webInfo.webHead = res;
       },
+      addLoginCover(res){this.webInfo.loginCover = res;},
+      addAdminLoginCover(res){this.webInfo.adminLoginCover = res},
 
       getWebInfo() {
         this.$http.get(this.$constant.baseURL + "/webInfo/getInfo", {}, true)

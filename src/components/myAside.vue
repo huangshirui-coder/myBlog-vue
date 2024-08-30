@@ -8,15 +8,15 @@
         <div class="web-info">
           <div class="blog-info-box">
             <span>文章</span>
-            <span class="blog-info-num">1</span>
+            <span class="blog-info-num">{{ blogCount }}</span>
           </div>
           <div class="blog-info-box">
             <span>分类</span>
-            <span class="blog-info-num">1</span>
+            <span class="blog-info-num">{{blogSortCount}}</span>
           </div>
           <div class="blog-info-box">
             <span>访问量</span>
-            <span class="blog-info-num">1</span>
+            <span class="blog-info-num">{{visitCount}}</span>
           </div>
         </div>
         <a class="collection-btn" @click="showTip()">
@@ -104,6 +104,9 @@
           size: 5,
           recommendStatus: true
         },
+        blogCount: 0,
+        blogSortCount: 0,
+        visitCount: 0,
         sortInfo: [],
         recommendArticles: [],
         // admires: [],
@@ -117,8 +120,14 @@
     created() {
       this.getRecommendArticles();
       this.getSortInfo();
+      this.getCount();
     },
     methods: {
+      getCount(){
+        this.$http.get(this.$constant.baseURL + "/blog/blogCount").then(res => {this.blogCount = res.data})
+        this.$http.get(this.$constant.baseURL + "/blogsort/blogSortCount").then(res => {this.blogSortCount = res.data})
+        this.$http.get(this.$constant.baseURL + "/webInfo/visitCount").then(res => {this.visitCount = res.data})
+      },
       getSortInfo(){
         this.sortInfo = this.$store.state.sortInfo;
       },
