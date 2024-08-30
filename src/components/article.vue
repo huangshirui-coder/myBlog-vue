@@ -153,9 +153,9 @@
         </div>
 
         <div id="buttons">
-          <button class="btn" @click="likeOrCancel">👍 点赞</button>
-          <button class="btn" @click="collect">💖 收藏</button>
-          <button class="btn" @click="share">🔁 转发</button>
+          <button class="btn" :class="{ active: isLike }" @click.stop="likeOrCancel">👍 点赞</button>
+          <button class="btn" :class="{ active: isRecord }" @click.stop="collect">💖 收藏</button>
+          <button class="btn" @click.stop="share">🔁 转发</button>
         </div>
 
         <div id="toc" class="toc"></div>
@@ -631,6 +631,11 @@
     margin-right: 25px;
     cursor: pointer;
     user-select: none;
+  }
+
+  .active {
+    background-color: darkgray; /* 或者你想要的深色背景 */
+    color: white; /* 如果需要的话改变文字颜色 */
   }
 
   .article-sort span:hover {

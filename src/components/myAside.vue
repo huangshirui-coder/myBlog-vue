@@ -8,15 +8,15 @@
         <div class="web-info">
           <div class="blog-info-box">
             <span>文章</span>
-            <span class="blog-info-num">1</span>
+            <span class="blog-info-num">{{ blogCount }}</span>
           </div>
           <div class="blog-info-box">
             <span>分类</span>
-            <span class="blog-info-num">1</span>
+            <span class="blog-info-num">{{blogSortCount}}</span>
           </div>
           <div class="blog-info-box">
             <span>访问量</span>
-            <span class="blog-info-num">1</span>
+            <span class="blog-info-num">{{visitCount}}</span>
           </div>
         </div>
         <a class="collection-btn" @click="showTip()">
@@ -59,7 +59,7 @@
              @click="$router.push({path: `/article/${article.uid}`})">
           <div class="aside-post-detail">
             <div class="aside-post-image">
-              <el-image lazy class="my-el-image" :src="article.articleCover" fit="cover">
+              <el-image lazy class="my-el-image" :src="article.coverpic" fit="cover">
                 <div slot="error" class="image-slot">
                   <div class="error-aside-image">
                     {{article.author}}
@@ -104,6 +104,9 @@
           size: 5,
           recommendStatus: true
         },
+        blogCount: 0,
+        blogSortCount: 0,
+        visitCount: 0,
         sortInfo: [],
         recommendArticles: [],
         // admires: [],
@@ -117,8 +120,14 @@
     created() {
       this.getRecommendArticles();
       this.getSortInfo();
+      this.getCount();
     },
     methods: {
+      getCount(){
+        this.$http.get(this.$constant.baseURL + "/blog/blogCount").then(res => {this.blogCount = res.data})
+        this.$http.get(this.$constant.baseURL + "/blogsort/blogSortCount").then(res => {this.blogSortCount = res.data})
+        this.$http.get(this.$constant.baseURL + "/webInfo/visitCount").then(res => {this.visitCount = res.data})
+      },
       getSortInfo(){
         this.sortInfo = this.$store.state.sortInfo;
       },
@@ -272,42 +281,6 @@
     animation: scale 1s ease-in-out infinite;
   }
 
-  .aside-post-detail {
-    display: flex;
-    cursor: pointer;
-  }
-
-  .aside-post-image {
-    width: 40%;
-    min-height: 50px;
-    border-radius: 6px;
-    margin-right: 8px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .error-aside-image {
-    background: var(--themeBackground);
-    color: var(--white);
-    padding: 10px;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-  }
-
-  .aside-post-title {
-    width: 60%;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
-  .aside-post-date {
-    margin-top: 8px;
-    margin-bottom: 20px;
-    color: var(--greyFont);
-    font-size: 12px;
-  }
 
   .post-sort {
     border-radius: 1rem;

@@ -22,6 +22,10 @@ const routes = [
       name: "index",
       component: () => import('../components/index')
     }, {
+      path: "/listShow",
+      name: "listShow",
+      component: () => import('../components/listShow')
+    }, {
       path: "/sort",
       name: "sort",
       component: () => import('../components/sort')

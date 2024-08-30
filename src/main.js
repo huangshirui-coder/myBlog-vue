@@ -13,6 +13,7 @@ import mavonEditor from 'mavon-editor'
 //引入js
 import './utils/title'
 //引入css
+import './assets/css/myglobal.css'
 import './assets/css/animation.css'
 import './assets/css/index.css'
 import './assets/css/tocbot.css'
