@@ -1,11 +1,11 @@
 export default {
   // 测试环境
-  // baseURL: "http://localhost:8088",
-  // webURL: "http://localhost:8080",
+  baseURL: "http://localhost:8088",
+  webURL: "http://localhost:8080",
 
   // 生产环境
-  baseURL: "http://203.195.195.64:8088",
-  webURL: "http://203.195.195.64:8080",
+  // baseURL: "http://203.195.195.64:8088",
+  // webURL: "http://203.195.195.64:8080",
 
   host: location.hostname + (location.port ? ':' + location.port : ''),
 
