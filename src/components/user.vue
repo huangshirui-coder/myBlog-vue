@@ -107,8 +107,129 @@
             </proButton>
           </div>
         </div>
+<!--        右边栏-->
         <div class="user-right">
+          <!-- 点赞文章 -->
+          <div v-if="!$common.isEmpty(likeBlogList)"
+               style="padding: 25px;border-radius: 10px;animation: hideToShow 1s ease-in-out"
+               class="shadow-box background-opacity wow">
+            <div class="container">
+              <div>
+                <svg viewBox="0 0 1024 1024" width="20" height="20"
+                     style="vertical-align: -2px;margin-bottom: -2px">
+                  <path
+                    d="M367.36 482.304H195.9936c-63.3344 0-114.6368-51.3536-114.6368-114.6368V196.2496c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368V367.616c0 63.3344-51.3536 114.688-114.688 114.688zM367.36 938.752H195.9936c-63.3344 0-114.6368-51.3536-114.6368-114.6368v-171.4176c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368v171.4176c0 63.3344-51.3536 114.6368-114.688 114.6368zM828.672 938.752h-171.4176c-63.3344 0-114.6368-51.3536-114.6368-114.6368v-171.4176c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368v171.4176c0 63.3344-51.3024 114.6368-114.6368 114.6368zM828.672 482.304h-171.4176c-63.3344 0-114.6368-51.3536-114.6368-114.6368V196.2496c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368V367.616c0 63.3344-51.3024 114.688-114.6368 114.688z"
+                    fill="#FF623E"></path>
+                </svg>
+                <span>点赞文章</span>
+              </div>
+              <div class="article-more" @click="$router.push({path: '/listShow', query: {type: 'like'}})">
+                <svg viewBox="0 0 1024 1024" width="20" height="20"
+                     style="vertical-align: -2px;margin-bottom: -2px">
+                  <path
+                    d="M347.3 897.3H142.2c-30.8 0-51.4-31.7-38.9-59.9l136.1-306.1c4.9-11 4.9-23.6 0-34.6L103.3 190.6c-12.5-28.2 8.1-59.9 38.9-59.9h205.1c16.8 0 32.1 9.9 38.9 25.3l151.4 340.7c4.9 11 4.9 23.6 0 34.6L386.3 872.1c-6.9 15.3-22.1 25.2-39 25.2z"
+                    fill="#009F72"></path>
+                  <path
+                    d="M730.4 897.3H525.3c-30.8 0-51.4-31.7-38.9-59.9l136.1-306.1c4.9-11 4.9-23.6 0-34.6L486.4 190.6c-12.5-28.2 8.1-59.9 38.9-59.9h205.1c16.8 0 32.1 9.9 38.9 25.3l151.4 340.7c4.9 11 4.9 23.6 0 34.6L769.3 872.1c-6.8 15.3-22.1 25.2-38.9 25.2z"
+                    fill="#F9DB88"></path>
+                </svg>
+                MORE
+              </div>
+            </div>
+            <div v-for="(article, index) in likeBlogList"
+                 :key="index"
+                 @click="$router.push({path: `/article/${article.uid}`})">
+              <div class="myCard-container">
+                <div class="myCard">
+                  <div class="aside-post-detail">
+                    <div class="aside-post-image">
+                      <el-image lazy class="my-el-image" :src="article.coverpic" fit="cover">
+                        <div slot="error" class="image-slot">
+                          <div class="error-aside-image">
+                            {{article.author}}
+                          </div>
+                        </div>
+                      </el-image>
+                      <div class="hasVideo transformCenter" v-if="false">
+                        <svg viewBox="0 0 1024 1024" width="30" height="30">
+                          <path
+                            d="M514 114.3c-219.9 0-398.9 178.9-398.9 398.9 0.1 219.9 179 398.8 398.9 398.8 219.9 0 398.8-178.9 398.8-398.8S733.9 114.3 514 114.3z m173 421.9L437.1 680.5c-17.7 10.2-39.8-2.6-39.8-23V368.9c0-20.4 22.1-33.2 39.8-23L687 490.2c17.7 10.2 17.7 35.8 0 46z"
+                            fill="#0C0C0C"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="aside-post-title">
+                      {{ article.title }}
+                    </div>
+                  </div>
+                  <div class="aside-post-date">
+                    <i class="el-icon-date" style="color: var(--greyFont)"></i>{{ article.createTime }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- 收藏文章 -->
+          <div v-if="!$common.isEmpty(recordBlogList)"
+               style="margin-top: 30px;padding: 25px;border-radius: 10px;animation: hideToShow 1s ease-in-out"
+               class="shadow-box background-opacity wow">
+            <div class="container">
+              <div>
+                <svg viewBox="0 0 1024 1024" width="20" height="20"
+                     style="vertical-align: -2px;margin-bottom: -2px">
+                  <path
+                    d="M367.36 482.304H195.9936c-63.3344 0-114.6368-51.3536-114.6368-114.6368V196.2496c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368V367.616c0 63.3344-51.3536 114.688-114.688 114.688zM367.36 938.752H195.9936c-63.3344 0-114.6368-51.3536-114.6368-114.6368v-171.4176c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368v171.4176c0 63.3344-51.3536 114.6368-114.688 114.6368zM828.672 938.752h-171.4176c-63.3344 0-114.6368-51.3536-114.6368-114.6368v-171.4176c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368v171.4176c0 63.3344-51.3024 114.6368-114.6368 114.6368zM828.672 482.304h-171.4176c-63.3344 0-114.6368-51.3536-114.6368-114.6368V196.2496c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368V367.616c0 63.3344-51.3024 114.688-114.6368 114.688z"
+                    fill="#FF623E"></path>
+                </svg>
+                <span>收藏文章</span>
+              </div>
+              <div class="article-more" @click="$router.push({path: '/listShow', query: {type: 'record'}})">
+                <svg viewBox="0 0 1024 1024" width="20" height="20"
+                     style="vertical-align: -2px;margin-bottom: -2px">
+                  <path
+                    d="M347.3 897.3H142.2c-30.8 0-51.4-31.7-38.9-59.9l136.1-306.1c4.9-11 4.9-23.6 0-34.6L103.3 190.6c-12.5-28.2 8.1-59.9 38.9-59.9h205.1c16.8 0 32.1 9.9 38.9 25.3l151.4 340.7c4.9 11 4.9 23.6 0 34.6L386.3 872.1c-6.9 15.3-22.1 25.2-39 25.2z"
+                    fill="#009F72"></path>
+                  <path
+                    d="M730.4 897.3H525.3c-30.8 0-51.4-31.7-38.9-59.9l136.1-306.1c4.9-11 4.9-23.6 0-34.6L486.4 190.6c-12.5-28.2 8.1-59.9 38.9-59.9h205.1c16.8 0 32.1 9.9 38.9 25.3l151.4 340.7c4.9 11 4.9 23.6 0 34.6L769.3 872.1c-6.8 15.3-22.1 25.2-38.9 25.2z"
+                    fill="#F9DB88"></path>
+                </svg>
+                MORE
+              </div>
+            </div>
+            <div v-for="(article, index) in recordBlogList"
+                 :key="index"
+                 @click="$router.push({path: `/article/${article.uid}`})">
+              <div class="myCard-container">
+                <div class="myCard">
+                  <div class="aside-post-detail">
+                    <div class="aside-post-image">
+                      <el-image lazy class="my-el-image" :src="article.coverpic" fit="cover">
+                        <div slot="error" class="image-slot">
+                          <div class="error-aside-image">
+                            {{article.author}}
+                          </div>
+                        </div>
+                      </el-image>
+                      <div class="hasVideo transformCenter" v-if="false">
+                        <svg viewBox="0 0 1024 1024" width="30" height="30">
+                          <path
+                            d="M514 114.3c-219.9 0-398.9 178.9-398.9 398.9 0.1 219.9 179 398.8 398.9 398.8 219.9 0 398.8-178.9 398.8-398.8S733.9 114.3 514 114.3z m173 421.9L437.1 680.5c-17.7 10.2-39.8-2.6-39.8-23V368.9c0-20.4 22.1-33.2 39.8-23L687 490.2c17.7 10.2 17.7 35.8 0 46z"
+                            fill="#0C0C0C"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="aside-post-title">
+                      {{ article.title }}
+                    </div>
+                  </div>
+                  <div class="aside-post-date">
+                    <i class="el-icon-date" style="color: var(--greyFont)"></i>{{ article.createTime }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -213,14 +334,38 @@
         dialogTitle: "",
         codeString: "验证码",
         passwordFlag: null,
-        intervalCode: null
+        intervalCode: null,
+
+        pagination:{
+          pageNum: 1,
+          pageSize: 5,
+          total: 0,
+          userUid: this.$store.state.currentUser.id
+        },
+        likeBlogList: [],
+        recordBlogList: [],
       }
     },
     computed: {},
     created() {
-
+      if (!this.$common.isEmpty(this.$store.state.currentUser)){
+        this.getLikeBlog();
+        this.getRecordBlog();
+      }
     },
     methods: {
+      getLikeBlog(){
+        this.$http.get(this.$constant.baseURL + "/blog/getLikeBlogByUser", this.pagination)
+          .then(res => {
+            this.likeBlogList = res.rows;
+          })
+      },
+      getRecordBlog(){
+        this.$http.get(this.$constant.baseURL + "/blog/getRecordBlogByUser", this.pagination)
+          .then(res => {
+            this.recordBlogList = res.rows;
+          })
+      },
       addPicture(res) {
         this.avatar = res;
         this.submitDialog()
@@ -651,6 +796,42 @@
 </script>
 
 <style scoped>
+  /* 在你的全局样式文件或组件的 <style scoped> 中添加以下样式 */
+
+  .myCard-container {
+    display: flex;
+    flex-wrap: wrap; /* 允许换行 */
+    gap: 1rem; /* 间隔 */
+  }
+
+  .myCard {
+    flex: 1 0 calc(50% - 0.5rem); /* 计算每列宽度，减去间隙的一半 */
+    box-sizing: border-box; /* 包含 padding 和 border */
+    max-width: calc(50% - 0.5rem); /* 确保每列宽度不超过50% */
+    width: calc(50% - 0.5rem); /* 明确设置宽度 */
+  }
+
+  .container {
+    display: flex;       /* 启用 Flexbox 布局 */
+    justify-content: space-between; /* 内容在主轴上平均分布剩余空间 */
+    align-items: center; /* 垂直居中对齐 */
+    margin-bottom: 20px;
+  }
+
+  /* 你可以根据需要调整 span 和 div 的样式 */
+  span {
+    margin-right: auto; /* 确保 span 在左侧 */
+  }
+
+  .article-more {
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .article-more:hover {
+    font-weight: 700;
+    transform: scale(1.1);
+  }
 
   .in-up-container {
     height: 100vh;
@@ -885,7 +1066,7 @@
     }
 
     .user-right {
-      display: none;
+      display: flex;
     }
   }
 </style>
