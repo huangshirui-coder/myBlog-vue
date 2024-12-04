@@ -182,14 +182,7 @@
         this.$http.get(this.$constant.baseURL + "/webInfo/getInfo", {}, true)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
-              this.webInfo.id = res.data.id;
-              this.webInfo.webName = res.data.webName;
-              this.webInfo.webWelcome = res.data.webWelcome;
-              this.webInfo.webTitle = res.data.webTitle;
-              this.webInfo.webFootor = res.data.webFootor;
-              this.webInfo.cover = res.data.cover;
-              this.webInfo.webHead = res.data.webHead;
-              this.webInfo.webNotices = res.data.webNotices;
+              this.webInfo = res.data;
             }
           })
           .catch((error) => {
